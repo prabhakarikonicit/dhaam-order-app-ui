@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import TableTemplate from "./common/tableTemplate";
+import CustomModal from "./common/modals";
 import { Order, TableColumns } from "../types";
 const Orders = () => {
 
@@ -22,7 +23,7 @@ const Orders = () => {
       </div>
     );
   };
-  const renderPaymentMethod = (method: string) => {
+  const renderPaymentMethod = (method: string, orderId:string) => {
     const methodStyles: { [key: string]: string } = {
       Cash: "bg-[#1A8917] text-white cursor-pointer hover:bg-[#157512]",
       UPI: "bg-[#DD9E06] text-white",
@@ -36,7 +37,7 @@ const Orders = () => {
           className={`px-3 py-1 text-center rounded-custom4px font-inter text-[12px] font-[500] ${
             methodStyles[method] || ""
           }`}
-          // onClick={() => handleOpenPaymentModal(row)}
+          onClick={() => handleOpenPaymentModal(orderId)}
           role="button"
           aria-label="View payment details"
         >
@@ -55,6 +56,39 @@ const Orders = () => {
       </div>
     );
   };
+
+  const preparePaymentDetails = () => {
+    if (!selectedOrder) return undefined;
+
+    // Create sample items for the order (simulate what would come from your data)
+    const items = [
+      {
+        name: "Chicken Burger",
+        quantity: 2,
+        price: "₹100.00",
+      },
+      {
+        name: "Chicken Burger",
+        quantity: 2,
+        price: "₹100.00",
+      },
+      {
+        name: "Chicken Burger",
+        quantity: 2,
+        price: "₹100.00",
+      },
+    ];
+
+    return {
+      orderId: selectedOrder.orderId,
+      paymentMethod: selectedOrder.paymentMethod,
+      items: items,
+      total: "₹300.00",
+      store: selectedOrder.store,
+      storeAddress: "Queenstown Public House",
+      deliveryAddress: selectedOrder.deliveryAddress,
+    };
+  };
   const [orders, setOrders] = useState<Order[]>([
     {
       id: '1',
@@ -66,126 +100,126 @@ const Orders = () => {
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Cash"),
+      paymentMethod: renderPaymentMethod("Cash", '1'),
       createdDate: "2025-02-12",
     },
-    {
-      id: '2',
-      orderId: "#20345",
-      amount: "₹100.00",
-      status: renderStatus("Pending"),
-      store: "Plumed Horse",
-      deliveryAddress: "8502 Preston Rd. Inglewood, Maine 98380",
-      deliveryMode: "Home delivery",
-      scheduleTime: "06:30 PM",
-      scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("UPI"),
-      createdDate: "2025-02-15",
-    },
-    {
-      id: "3",
-      orderId: "#20345",
-      amount: "₹100.00",
-      status: renderStatus("Dispatched"),
-      store: "King Lee's",
-      deliveryAddress: "3517 W. Gray St. Utica, Pennsylvania 57867",
-      deliveryMode: "Home delivery",
-      scheduleTime: "06:30 PM",
-      scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Credit Card"),
-      createdDate: "2025-02-18",
-    },
-    {
-      id: "4",
-      orderId: "#20345",
-      amount: "₹100.00",
-      status: renderStatus("Cancelled"),
-      store: "Marina Kitchen",
-      deliveryAddress: "4140 Parker Rd. Allentown, New Mexico 31134",
-      deliveryMode: "Home delivery",
-      scheduleTime: "06:30 PM",
-      scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Cash"),
-      createdDate: "2025-02-20",
-    },
-    {
-      id: "5",
-      orderId: "#20345",
-      amount: "₹100.00",
-      status: renderStatus("Out for delivery"),
-      store: "The Aviary",
-      deliveryAddress: "4517 Washington Ave. Manchester, Kentucky 39495",
-      deliveryMode: "Home delivery",
-      scheduleTime: "06:30 PM",
-      scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("UPI"),
-      createdDate: "2025-02-22",
-    },
-    {
-      id: "6",
-      orderId: "#20345",
-      amount: "₹100.00",
-      status: renderStatus("Pending"),
-      store: "Crab Hut",
-      deliveryAddress: "2715 Ash Dr. San Jose, South Dakota 83475",
-      deliveryMode: "Home delivery",
-      scheduleTime: "06:30 PM",
-      scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Credit Card"),
-      createdDate: "2025-02-24",
-    },
-    {
-      id: "7",
-      orderId: "#20345",
-      amount: "₹100.00",
-      status: renderStatus("Completed"),
-      store: "Brass Tacks",
-      deliveryAddress: "2972 Westheimer Rd. Santa Ana, Illinois 85486",
-      deliveryMode: "Home delivery",
-      scheduleTime: "06:30 PM",
-      scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Cash"),
-      createdDate: "2025-02-25",
-    },
-    {
-      id: "8",
-      orderId: "#20345",
-      amount: "₹100.00",
-      status: renderStatus("Out for delivery"),
-      store: "Bean Around the World Coffees",
-      deliveryAddress: "2715 Ash Dr. San Jose, South Dakota 83475",
-      deliveryMode: "Home delivery",
-      scheduleTime: "06:30 PM",
-      scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("UPI"),
-      createdDate: "2025-02-26",
-    },
-    {
-      id: "9",
-      orderId: "#20345",
-      amount: "₹100.00",
-      status: renderStatus("Cancelled"),
-      store: "Chewy Balls",
-      deliveryAddress: "1901 Thornridge Cir. Shiloh, Hawaii 81063",
-      deliveryMode: "Home delivery",
-      scheduleTime: "06:30 PM",
-      scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Credit Card"),
-      createdDate: "2025-02-27",
-    },
-    {
-      id: "10",
-      orderId: "#20345",
-      amount: "₹100.00",
-      status: renderStatus("Out for delivery"),
-      store: "Proxi",
-      deliveryAddress: "2118 Thornridge Cir. Syracuse, Connecticut 35624",
-      deliveryMode: "Home delivery",
-      scheduleTime: "06:30 PM",
-      scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Cash"),
-      createdDate: "2025-02-28",
-    },
+    // {
+    //   id: '2',
+    //   orderId: "#20345",
+    //   amount: "₹100.00",
+    //   status: renderStatus("Pending"),
+    //   store: "Plumed Horse",
+    //   deliveryAddress: "8502 Preston Rd. Inglewood, Maine 98380",
+    //   deliveryMode: "Home delivery",
+    //   scheduleTime: "06:30 PM",
+    //   scheduleDate: "January 26",
+    //   paymentMethod: renderPaymentMethod("UPI"),
+    //   createdDate: "2025-02-15",
+    // },
+    // {
+    //   id: "3",
+    //   orderId: "#20345",
+    //   amount: "₹100.00",
+    //   status: renderStatus("Dispatched"),
+    //   store: "King Lee's",
+    //   deliveryAddress: "3517 W. Gray St. Utica, Pennsylvania 57867",
+    //   deliveryMode: "Home delivery",
+    //   scheduleTime: "06:30 PM",
+    //   scheduleDate: "January 26",
+    //   paymentMethod: renderPaymentMethod("Credit Card"),
+    //   createdDate: "2025-02-18",
+    // },
+    // {
+    //   id: "4",
+    //   orderId: "#20345",
+    //   amount: "₹100.00",
+    //   status: renderStatus("Cancelled"),
+    //   store: "Marina Kitchen",
+    //   deliveryAddress: "4140 Parker Rd. Allentown, New Mexico 31134",
+    //   deliveryMode: "Home delivery",
+    //   scheduleTime: "06:30 PM",
+    //   scheduleDate: "January 26",
+    //   paymentMethod: renderPaymentMethod("Cash"),
+    //   createdDate: "2025-02-20",
+    // },
+    // {
+    //   id: "5",
+    //   orderId: "#20345",
+    //   amount: "₹100.00",
+    //   status: renderStatus("Out for delivery"),
+    //   store: "The Aviary",
+    //   deliveryAddress: "4517 Washington Ave. Manchester, Kentucky 39495",
+    //   deliveryMode: "Home delivery",
+    //   scheduleTime: "06:30 PM",
+    //   scheduleDate: "January 26",
+    //   paymentMethod: renderPaymentMethod("UPI"),
+    //   createdDate: "2025-02-22",
+    // },
+    // {
+    //   id: "6",
+    //   orderId: "#20345",
+    //   amount: "₹100.00",
+    //   status: renderStatus("Pending"),
+    //   store: "Crab Hut",
+    //   deliveryAddress: "2715 Ash Dr. San Jose, South Dakota 83475",
+    //   deliveryMode: "Home delivery",
+    //   scheduleTime: "06:30 PM",
+    //   scheduleDate: "January 26",
+    //   paymentMethod: renderPaymentMethod("Credit Card"),
+    //   createdDate: "2025-02-24",
+    // },
+    // {
+    //   id: "7",
+    //   orderId: "#20345",
+    //   amount: "₹100.00",
+    //   status: renderStatus("Completed"),
+    //   store: "Brass Tacks",
+    //   deliveryAddress: "2972 Westheimer Rd. Santa Ana, Illinois 85486",
+    //   deliveryMode: "Home delivery",
+    //   scheduleTime: "06:30 PM",
+    //   scheduleDate: "January 26",
+    //   paymentMethod: renderPaymentMethod("Cash"),
+    //   createdDate: "2025-02-25",
+    // },
+    // {
+    //   id: "8",
+    //   orderId: "#20345",
+    //   amount: "₹100.00",
+    //   status: renderStatus("Out for delivery"),
+    //   store: "Bean Around the World Coffees",
+    //   deliveryAddress: "2715 Ash Dr. San Jose, South Dakota 83475",
+    //   deliveryMode: "Home delivery",
+    //   scheduleTime: "06:30 PM",
+    //   scheduleDate: "January 26",
+    //   paymentMethod: renderPaymentMethod("UPI"),
+    //   createdDate: "2025-02-26",
+    // },
+    // {
+    //   id: "9",
+    //   orderId: "#20345",
+    //   amount: "₹100.00",
+    //   status: renderStatus("Cancelled"),
+    //   store: "Chewy Balls",
+    //   deliveryAddress: "1901 Thornridge Cir. Shiloh, Hawaii 81063",
+    //   deliveryMode: "Home delivery",
+    //   scheduleTime: "06:30 PM",
+    //   scheduleDate: "January 26",
+    //   paymentMethod: renderPaymentMethod("Credit Card"),
+    //   createdDate: "2025-02-27",
+    // },
+    // {
+    //   id: "10",
+    //   orderId: "#20345",
+    //   amount: "₹100.00",
+    //   status: renderStatus("Out for delivery"),
+    //   store: "Proxi",
+    //   deliveryAddress: "2118 Thornridge Cir. Syracuse, Connecticut 35624",
+    //   deliveryMode: "Home delivery",
+    //   scheduleTime: "06:30 PM",
+    //   scheduleDate: "January 26",
+    //   paymentMethod: renderPaymentMethod("Cash"),
+    //   createdDate: "2025-02-28",
+    // },
   ]);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [popoverAnchorEl, setPopoverAnchorEl] = useState<HTMLElement | null>(
@@ -326,12 +360,48 @@ const Orders = () => {
   // Function to render payment method with appropriate styling
   
   // Handler for opening the payment modal
-  const handleOpenPaymentModal = (order: Order) => {
-    setSelectedOrder(order);
-    setModalMode("payment");
-    setIsModalOpen(true);
+  const handleOpenPaymentModal = (orderId: string) => {
+    const foundOrder = orders.find(order => order.id == orderId);
+    if(foundOrder){
+      setSelectedOrder(foundOrder);
+      setModalMode("payment");
+      setIsModalOpen(true);
+
+    }
+    
   };
-  return <TableTemplate tableColumns={columns} tableData={orders}/>;
+  return (
+  <>
+  <TableTemplate tableColumns={columns} tableData={orders}/>;
+  {isModalOpen &&
+        (modalMode === "payment" ? (
+          <CustomModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            mode="payment"
+            onSave={() => null}
+            title={selectedOrder?.orderId || "Order Details"}
+            size="sm"
+            showFooter={true}
+            paymentDetails={preparePaymentDetails()}
+            confirmText="Save"
+          />
+        ) : (
+          <CustomModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            mode={modalMode}
+            onSave={() => null}
+            title={modalMode === "add" ? "Create Order" : "Edit Order"}
+            fields={[]}
+            size="sm"
+            showToggle={false}
+            confirmText={modalMode === "add" ? "Create" : "Save"}
+          />
+        ))}
+
+  </>)
+  
 };
 
 export default Orders;

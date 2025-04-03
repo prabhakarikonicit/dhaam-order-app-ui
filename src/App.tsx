@@ -1,4 +1,5 @@
 import ReactDOM from "react-dom/client";
+import "./App.css";
 import "./index.css";
 import Orders from "./localComponents/orders";
 

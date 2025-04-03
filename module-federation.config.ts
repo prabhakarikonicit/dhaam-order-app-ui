@@ -1,6 +1,7 @@
 export const mfConfig = {
   name: "dhaam_order_app_ui",
-  filename: "remoteEntry.js",
-  // exposes: {"./OrderDiv": "./src/OrderDiv"},
+  exposes: {
+    "./Orders": "./src/localComponents/orders",
+  },
   shared: ["react", "react-dom"],
 };

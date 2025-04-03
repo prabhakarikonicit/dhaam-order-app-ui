@@ -23,7 +23,6 @@ export interface Order extends TableData{
   export interface TableColumns {
     field: string;
     headerName: string;
-    width: string;
     type?: "text" | "date" | "number";
   }
 

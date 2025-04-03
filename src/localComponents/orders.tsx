@@ -235,7 +235,6 @@ const Orders = () => {
     {
       field: "orderId",
       headerName: "Order ID",
-      width: "120px",
       type: "text",
       // renderCell: (value, row) => (
       //   <div className="flex items-center">
@@ -262,37 +261,31 @@ const Orders = () => {
     {
       field: "amount",
       headerName: "Amount",
-      width: "120px",
       type: "text",
     },
     {
       field: "status",
       headerName: "Status",
-      width: "150px",
       type: "text",
     },
     {
       field: "store",
       headerName: "Store",
-      width: "250px",
       type: "text",
     },
     {
       field: "deliveryAddress",
       headerName: "Delivery Address",
-      width: "300px",
       type: "text",
     },
     {
       field: "deliveryMode",
       headerName: "Delivery Mode",
-      width: "150px",
       type: "text",
     },
     {
       field: "scheduleTime",
       headerName: "Schedule Time",
-      width: "200px",
       type: "text",
       // renderCell: (value, row) => (
       //   <div>
@@ -308,7 +301,6 @@ const Orders = () => {
     {
       field: "createdDate",
       headerName: "Created Date",
-      width: "150px",
       type: "date",
       // renderCell: (value, row) => (
       //   <div className="text-[14px] font-inter font-[500] text-cardValue">
@@ -319,7 +311,6 @@ const Orders = () => {
     {
       field: "paymentMethod",
       headerName: "Payment Method",
-      width: "150px",
       type: "text",
       // renderCell: (value, row) => renderPaymentMethod(value, row),
     },
@@ -373,7 +364,7 @@ const Orders = () => {
   return (
   <>
   <TableTemplate tableColumns={columns} tableData={orders}/>;
-  {isModalOpen &&
+  {/* {isModalOpen &&
         (modalMode === "payment" ? (
           <CustomModal
             isOpen={isModalOpen}
@@ -398,7 +389,7 @@ const Orders = () => {
             showToggle={false}
             confirmText={modalMode === "add" ? "Create" : "Save"}
           />
-        ))}
+        ))} */}
 
   </>)
   

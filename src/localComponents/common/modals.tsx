@@ -107,7 +107,7 @@ export interface CustomModalProps<T extends BaseItem> {
     store: string;
     storeAddress: string;
     deliveryAddress: string;
-  };
+  } | undefined;
 }
 
 // Toggle component for enabling/disabling items

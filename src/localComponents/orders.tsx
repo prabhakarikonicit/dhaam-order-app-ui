@@ -34,7 +34,7 @@ const Orders = () => {
     if (method === "Cash") {
       return (
         <div
-          className={`px-3 py-1 text-center rounded-custom4px font-inter text-[12px] font-[500] ${
+          className={`py-1 text-center rounded-custom4px font-inter text-[12px] font-[500] ${
             methodStyles[method] || ""
           }`}
           onClick={() => handleOpenPaymentModal(orderId)}
@@ -113,7 +113,7 @@ const Orders = () => {
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("UPI"),
+      paymentMethod: renderPaymentMethod("UPI", '2'),
       createdDate: "2025-02-15",
     },
     {
@@ -126,7 +126,7 @@ const Orders = () => {
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Credit Card"),
+      paymentMethod: renderPaymentMethod("Credit Card", '3'),
       createdDate: "2025-02-18",
     },
     {
@@ -139,7 +139,7 @@ const Orders = () => {
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Cash"),
+      paymentMethod: renderPaymentMethod("Cash", '4'),
       createdDate: "2025-02-20",
     },
     {
@@ -152,7 +152,7 @@ const Orders = () => {
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("UPI"),
+      paymentMethod: renderPaymentMethod("UPI", '5'),
       createdDate: "2025-02-22",
     },
     {
@@ -165,7 +165,7 @@ const Orders = () => {
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Credit Card"),
+      paymentMethod: renderPaymentMethod("Credit Card", '6'),
       createdDate: "2025-02-24",
     },
     {
@@ -178,7 +178,7 @@ const Orders = () => {
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Cash"),
+      paymentMethod: renderPaymentMethod("Cash", '7'),
       createdDate: "2025-02-25",
     },
     {
@@ -191,7 +191,7 @@ const Orders = () => {
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("UPI"),
+      paymentMethod: renderPaymentMethod("UPI", '8'),
       createdDate: "2025-02-26",
     },
     {
@@ -204,7 +204,7 @@ const Orders = () => {
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Credit Card"),
+      paymentMethod: renderPaymentMethod("Credit Card", '9'),
       createdDate: "2025-02-27",
     },
     {
@@ -217,7 +217,7 @@ const Orders = () => {
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Cash"),
+      paymentMethod: renderPaymentMethod("Cash", '10'),
       createdDate: "2025-02-28",
     },
   ]);
@@ -364,7 +364,7 @@ const Orders = () => {
   return (
   <>
   <TableTemplate tableColumns={columns} tableData={orders}/>
-  {/* {isModalOpen &&
+  {isModalOpen &&
         (modalMode === "payment" ? (
           <CustomModal
             isOpen={isModalOpen}
@@ -389,7 +389,7 @@ const Orders = () => {
             showToggle={false}
             confirmText={modalMode === "add" ? "Create" : "Save"}
           />
-        ))} */}
+        ))}
 
   </>)
   

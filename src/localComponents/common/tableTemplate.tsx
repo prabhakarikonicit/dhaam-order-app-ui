@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef} from "react";
 import { TableColumns, Order, TableData } from "../../types";
-const TableTemplate = ({tableColumns, tableData, hideToolbar=false}:{tableColumns:TableColumns[], tableData:TableData[], hideToolbar?:boolean}) => {
+const TableTemplate = ({tableColumns, tableData, hideToolbar=false, showActionColumn=false}:{tableColumns:TableColumns[], tableData:TableData[], hideToolbar?:boolean, showActionColumn?:boolean}) => {
   const [paginatedData, setPaginatedData] = useState<TableData[]>([]);
   const [modalMode, setModalMode] = useState<
     "add" | "edit" | "view" | "payment"
@@ -29,28 +29,61 @@ const TableTemplate = ({tableColumns, tableData, hideToolbar=false}:{tableColumn
     // Initialize visible columns
     // const allColumnFields = tableColumns.map((col) => col.field);
     // setVisibleColumns(allColumnFields);
+
+    // Close menus when clicking outside
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        columnMenuRef.current 
+        &&
+        !columnMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowColumnMenu(false);
+      }
+      // if (
+      //   filterMenuRef.current &&
+      //   !filterMenuRef.current.contains(event.target as Node)
+      // ) {
+      //   setShowFilterMenu(false);
+      // }
+      // if (
+      //   densityMenuRef.current &&
+      //   !densityMenuRef.current.contains(event.target as Node)
+      // ) {
+      //   setShowDensityMenu(false);
+      // }
+      // if (
+      //   datePickerRef.current &&
+      //   !datePickerRef.current.contains(event.target as Node)
+      // ) {
+      //   setShowDatePicker(false);
+      // }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
   }, []);
 
   
 
   const handleSelectRow = (id: string) => {
-    setSelectedRows((prev) => {
-      if (prev.includes(id)) {
-        return prev.filter((rowId) => rowId !== id);
+    setSelectedRows((currState) => {
+      if (currState.includes(id)) {
+        return currState.filter((rowId) => rowId !== id);
       } else {
-        return [...prev, id];
+        return [...currState, id];
       }
     });
   };
 
-  // const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const isSelected = event.target.checked;
-  //   if (isSelected) {
-  //     setSelectedRows(paginatedData.map((order) => order.id));
-  //   } else {
-  //     setSelectedRows([]);
-  //   }
-  // };
+  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const isSelected = event.target.checked;
+    if (isSelected) {
+      setSelectedRows(paginatedData.map((order) => order.id));
+    } else {
+      setSelectedRows([]);
+    }
+  };
 
   // const filterByDateRange = (
   //   ordersToFilter: TableData[],
@@ -75,96 +108,132 @@ const TableTemplate = ({tableColumns, tableData, hideToolbar=false}:{tableColumn
   return (
     <div className="px-8 pb-8 overflow-x-auto">
       <div className="w-full border border-grey-border rounded-custom8px mb-10">
-      {!hideToolbar && (
-        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            {/* Column toggle button */}
-            <div className="relative">
-              <button
-                className="flex items-center gap-2 text-[14px] font-inter font-[500] text-textHeading"
-                onClick={() => {
-                  setShowColumnMenu(!showColumnMenu);
-                  setShowFilterMenu(false);
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 14 14"
-                  fill="none"
+        {!hideToolbar && (
+          <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              {/* Column toggle button */}
+              <div className="relative">
+                <button
+                  className="flex items-center gap-2 text-[14px] font-inter font-[500] text-textHeading"
+                  onClick={() => {
+                    setShowColumnMenu(!showColumnMenu);
+                    setShowFilterMenu(false);
+                  }}
                 >
-                  <path
-                    d="M8.5575 2.91666V11.0833H5.4425V2.91666H8.5575ZM9.14083 11.0833H12.25V2.91666H9.14083V11.0833ZM4.85917 11.0833V2.91666H1.75V11.0833H4.85917Z"
-                    fill="#636363"
-                  />
-                </svg>
-                Columns
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 14 14"
+                    fill="none"
+                  >
+                    <path
+                      d="M8.5575 2.91666V11.0833H5.4425V2.91666H8.5575ZM9.14083 11.0833H12.25V2.91666H9.14083V11.0833ZM4.85917 11.0833V2.91666H1.75V11.0833H4.85917Z"
+                      fill="#636363"
+                    />
+                  </svg>
+                  Columns
+                </button>
 
-              {showColumnMenu && (
-                <div
-                  ref={columnMenuRef}
-                  className="absolute z-10 mt-2 w-56 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                >
-                  <div className="py-1 px-2">
-                    {tableColumns.map((column) => (
-                      <div
-                        key={column.field}
-                        className="flex items-center px-2 py-2"
-                      >
-                        <input
-                          type="checkbox"
-                          id={`column-${column.field}`}
-                          checked={hiddenColumns.includes(column.field) ? true:false}
-                          onChange={() => handleToggleColumnVisibility(column.field)}
-                          className="h-4 w-4 rounded border-gray-300 focus:ring-bgButton accent-bgButton"
-                        />
-                        <label
-                          htmlFor={`column-${column.field}`}
-                          className="ml-2 text-[12px] text-reloadButton font-inter"
+                {showColumnMenu && (
+                  <div
+                    ref={columnMenuRef}
+                    className="absolute z-10 mt-2 w-56 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"
+                  >
+                    <div className="py-1 px-2">
+                      {tableColumns.map((column) => (
+                        <div
+                          key={column.field}
+                          className="flex items-center px-2 py-2"
                         >
-                          {column.headerName}
-                        </label>
-                      </div>
-                    ))}
+                          <input
+                            type="checkbox"
+                            id={`column-${column.field}`}
+                            checked={
+                              !hiddenColumns.includes(column.field)
+                                ? true
+                                : false
+                            }
+                            onChange={() =>
+                              handleToggleColumnVisibility(column.field)
+                            }
+                            className="h-4 w-4 rounded border-gray-300 focus:ring-bgButton accent-bgButton"
+                          />
+                          <label
+                            htmlFor={`column-${column.field}`}
+                            className="ml-2 text-[12px] text-reloadButton font-inter"
+                          >
+                            {column.headerName}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
-      <table className="w-full border-collapse table-auto">
-      <thead><tr className="border-b border-gray-200 bg-background-grey">
-            <th className="p-4">
-              {/* <input
-                type="checkbox"
-                checked={
-                  selectedRows.length === filteredRows.length &&
-                  filteredRows.length > 0
-                }
-                onChange={onSelectAll}
-                className="h-4 w-4 rounded border-btnBorder focus:ring-bgButton accent-bgButton"
-              /> */}
-            </th>
-            {tableColumns
-              .filter((column) => !hiddenColumns.includes(column.field))
-              .map((col) => (
-                <th
-                  key={col.field}
-                  className="text-left p-4 font-inter font-[600] text-headding-color bg-background-grey"
-                >
-                  {col.headerName}
-                </th>
-              ))}
-            {/* {showActionColumn && (
-              <th className="text-left p-4 font-inter font-[600] text-headding-color bg-background-grey">
-                Action
+        )}
+        <table className="w-full border-collapse table-auto">
+          <thead>
+            <tr className="border-b border-gray-200 bg-background-grey">
+              <th className="p-4">
+                <input
+                  type="checkbox"
+                  checked={selectedRows.length === paginatedData.length}
+                  onChange={handleSelectAll}
+                  className="h-4 w-4 rounded border-btnBorder focus:ring-bgButton accent-bgButton"
+                />
               </th>
-            )} */}
-          </tr></thead>
-      </table>
+              {tableColumns
+                .filter((column) => !hiddenColumns.includes(column.field))
+                .map((col) => (
+                  <th
+                    key={col.field}
+                    className="text-left p-4 font-inter font-[600] text-headding-color bg-background-grey"
+                  >
+                    {col.headerName}
+                  </th>
+                ))}
+              {showActionColumn && (
+                <th className="text-left p-4 font-inter font-[600] text-headding-color bg-background-grey">
+                  Action
+                </th>
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedData.map((row) => (
+              <tr
+                key={row.id}
+                className="border-b border-gray-200 bg-store-card"
+              >
+                <td className="p-4">
+                  <input
+                    type="checkbox"
+                    checked={selectedRows.includes(row.id)}
+                    onChange={() => handleSelectRow(row.id)}
+                    className="h-4 w-4 rounded border border-gray-300 focus:ring-bgButton accent-bgButton"
+                  />
+                </td>
+                {tableColumns
+                  .filter((column) => !hiddenColumns.includes(column.field))
+                  .map((col) => (
+                    <td
+                      key={col.field}
+                      className="p-4 text-[12px] font-inter font-[500] text-cardValue"
+                    >
+                      <div>
+                        <div className="text-[14px] font-inter font-[500] text-cardValue leading-[21px]">
+                          {row[col.field]}
+                        </div>
+                      </div>
+                    </td>
+                  ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
       {/* <CustomDataGrid
         rows={paginatedData}

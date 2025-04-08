@@ -1,7 +1,20 @@
-import React, {useState, useEffect, useRef} from "react";
-import { TableColumns, Order, TableData } from "../../types";
-const TableTemplate = ({tableColumns, tableData, hideToolbar=false, showActionColumn=false}:{tableColumns:TableColumns[], tableData:TableData[], hideToolbar?:boolean, showActionColumn?:boolean}) => {
-  const [paginatedData, setPaginatedData] = useState<TableData[]>([]);
+import React, { useState, useEffect, useRef } from "react";
+import { TableColumns, Order, TableData, Filter } from "../../types";
+const TableTemplate = ({
+  tableColumns,
+  tableData,
+  hideToolbar = false,
+  showActionColumn = false,
+  enableDateFilters = false,
+}: {
+  tableColumns: TableColumns[];
+  tableData: TableData[];
+  hideToolbar?: boolean;
+  showActionColumn?: boolean;
+  enableDateFilters?: boolean;
+}) => {
+  const [filteredData, setFilteredData] = useState<TableData[]>([]);
+
   const [modalMode, setModalMode] = useState<
     "add" | "edit" | "view" | "payment"
   >("add");
@@ -9,22 +22,32 @@ const TableTemplate = ({tableColumns, tableData, hideToolbar=false, showActionCo
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [hiddenColumns, setHiddenColumns] = useState<string[]>([]);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [startDate, setStartDate] = useState("2025-02-10");
+  const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("2025-02-28");
   const [density, setDensity] = useState<
     "compact" | "standard" | "comfortable"
   >("standard");
   const [showColumnMenu, setShowColumnMenu] = useState(false);
   const [showFilterMenu, setShowFilterMenu] = useState(false);
-    // Refs for handling outside clicks
+  const [appliedFilter, setAppliedFilter] = useState<{
+    [column: string]: string;
+  } | null>(null);
+  const [appliedFilterType, setAppliedFilterType] = useState<
+    "text" | "date" | "number"
+  >("text");
+  const [dateOperator, setDateOperator] = useState<
+    "equals" | "before" | "after" | "between"
+  >("equals");
+  const [activeFilters, setActiveFilters] = useState<Filter[]>([]);
+  // Refs for handling outside clicks
   const columnMenuRef = useRef<HTMLDivElement>(null);
+  const filterMenuRef = useRef<HTMLDivElement>(null);
 
   // Sample data initialization with createdDate field
   useEffect(() => {
-
     // Filter by date range initially
     // const filtered = filterByDateRange(mockOrders, startDate, endDate);
-    setPaginatedData(tableData);
+    setFilteredData(tableData);
 
     // Initialize visible columns
     // const allColumnFields = tableColumns.map((col) => col.field);
@@ -33,18 +56,17 @@ const TableTemplate = ({tableColumns, tableData, hideToolbar=false, showActionCo
     // Close menus when clicking outside
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        columnMenuRef.current 
-        &&
+        columnMenuRef.current &&
         !columnMenuRef.current.contains(event.target as Node)
       ) {
         setShowColumnMenu(false);
       }
-      // if (
-      //   filterMenuRef.current &&
-      //   !filterMenuRef.current.contains(event.target as Node)
-      // ) {
-      //   setShowFilterMenu(false);
-      // }
+      if (
+        filterMenuRef.current &&
+        !filterMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowFilterMenu(false);
+      }
       // if (
       //   densityMenuRef.current &&
       //   !densityMenuRef.current.contains(event.target as Node)
@@ -59,12 +81,187 @@ const TableTemplate = ({tableColumns, tableData, hideToolbar=false, showActionCo
       // }
     };
     document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
-  
+  useEffect(() => {
+    if (appliedFilterType && appliedFilterType == "date") {
+      setStartDate("");
+      setEndDate("");
+      setDateOperator("equals");
+    }
+  }, [appliedFilterType]);
+
+  const handleAppliedFilterChange = (filterCol: string) => {
+    setAppliedFilter({ [filterCol]: "" });
+    const filterType = tableColumns.find((col) => col.field == filterCol)?.type;
+    if (filterType) setAppliedFilterType(filterType);
+  };
+
+  // Handle adding a filter
+  // const addFilter = (field: string, value: string) => {
+  //   if (!field || field === "" || !value) return;
+
+  //   const column = tableColumns.find((col) => col.field === field);
+  //   if (!column) return;
+
+  //   // Check if filter already exists
+  //   const existingFilterIndex = activeFilters.findIndex(
+  //     (f) => f.field === field
+  //   );
+
+  //   const newFilter: Filter = {
+  //     field,
+  //     value,
+  //     type: column.type || "text",
+  //   };
+
+  //   // Add date-specific properties if it's a date filter
+  //   if (column.type === "date") {
+  //     newFilter.dateOperator = dateOperator;
+  //     if (dateOperator === "between") {
+  //       newFilter.endDate = endDate;
+  //     }
+  //   }
+
+  //   if (existingFilterIndex >= 0) {
+  //     // Update existing filter
+  //     const updatedFilters = [...activeFilters];
+  //     updatedFilters[existingFilterIndex] = newFilter;
+  //     setActiveFilters(updatedFilters);
+  //   } else {
+  //     // Add new filter
+  //     setActiveFilters([...activeFilters, newFilter]);
+  //   }
+
+  //   // Reset filter form
+  //   setShowFilterMenu(false);
+  //   setSelectedFilterField("");
+  //   setDateOperator("equals");
+  //   setStartDate("");
+  //   setEndDate("");
+  // };
+
+  // Handle removing a filter
+  const removeFilter = (field: string) => {
+    setActiveFilters(activeFilters.filter((f) => f.field !== field));
+  };
+
+  // Function to format filter display text
+  const formatFilterDisplay = (filter: Filter): string => {
+    if (filter.type === "date") {
+      switch (filter.dateOperator) {
+        case "equals":
+          return `equals ${filter.value}`;
+        case "before":
+          return `before ${filter.value}`;
+        case "after":
+          return `after ${filter.value}`;
+        case "between":
+          return `between ${filter.value} and ${filter.endDate}`;
+        default:
+          return filter.value;
+      }
+    }
+    return filter.value;
+  };
+
+  // Handle field selection for filters
+  const handleFilterFieldChange = (field: string) => {
+    setAppliedFilter(field);
+    const selectedColumn = tableColumns.find((col) => col.field === field);
+    setAppliedFilterType(selectedColumn?.type || "text");
+
+    // Reset date-specific states when changing fields
+    if (selectedColumn?.type !== "date") {
+      setDateOperator("equals");
+      setStartDate("");
+      setEndDate("");
+    }
+  };
+
+  const handleFilterValueChange = (value: string) => {
+    if (appliedFilter && Object.keys(appliedFilter).length > 0) {
+      const filterColumn = Object.keys(appliedFilter)[0];
+      setAppliedFilter({ [filterColumn]: value });
+    }
+  };
+
+  useEffect(() => {
+    console.log("appliedFilter", appliedFilter);
+    let result = tableData;
+    if (appliedFilter && Object.keys(appliedFilter).length > 0) {
+      const filterColumn = Object.keys(appliedFilter)[0];
+      const filterValue = appliedFilter[filterColumn];
+      if (filterColumn && filterValue) {
+        result = result.filter((item) => {
+          const tableCell = String(item[filterColumn]).toLowerCase();
+          return tableCell.toLowerCase().includes(filterValue.toLowerCase());
+        });
+      }
+      if (filterColumn && appliedFilterType == "date") {
+        if (startDate && startDate != "" && dateOperator != "between") {
+          result = result.filter((item) => {
+            try {
+              const tableCell = String(item[filterColumn]).toLowerCase();
+              const TableCellDate = new Date(tableCell).getTime();
+              const formattedStartDate = new Date(startDate).getTime();
+              if (isNaN(TableCellDate) || isNaN(formattedStartDate))
+                return false;
+              switch (dateOperator) {
+                case "equals":
+                  return TableCellDate === formattedStartDate;
+                case "before":
+                  return TableCellDate < formattedStartDate;
+                case "after":
+                  return TableCellDate > formattedStartDate;
+                default:
+                  return false;
+              }
+            } catch (e) {
+              return false;
+            }
+          });
+        }
+        if (
+          startDate &&
+          startDate != "" &&
+          dateOperator == "between" &&
+          endDate &&
+          endDate != ""
+        ) {
+          result = result.filter((item) => {
+            try {
+              const tableCell = String(item[filterColumn]).toLowerCase();
+              const TableCellDate = new Date(tableCell).getTime();
+              const formattedStartDate = new Date(startDate).getTime();
+              const formattedEndtDate = new Date(endDate).getTime();
+              if (
+                isNaN(TableCellDate) ||
+                isNaN(formattedStartDate) ||
+                isNaN(formattedEndtDate)
+              )
+                return false;
+              return (
+                TableCellDate >= formattedStartDate &&
+                TableCellDate <= formattedEndtDate
+              );
+            } catch (e) {
+              return false;
+            }
+          });
+        }
+      }
+    }
+    if (!appliedFilter) {
+      setDateOperator("equals");
+      setStartDate("");
+      setAppliedFilterType("text");
+    }
+    setFilteredData(result);
+  }, [appliedFilter, dateOperator, startDate, endDate]);
 
   const handleSelectRow = (id: string) => {
     setSelectedRows((currState) => {
@@ -79,7 +276,7 @@ const TableTemplate = ({tableColumns, tableData, hideToolbar=false, showActionCo
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     const isSelected = event.target.checked;
     if (isSelected) {
-      setSelectedRows(paginatedData.map((order) => order.id));
+      setSelectedRows(filteredData.map((order) => order.id));
     } else {
       setSelectedRows([]);
     }
@@ -101,10 +298,13 @@ const TableTemplate = ({tableColumns, tableData, hideToolbar=false, showActionCo
   //   });
   // };
 
-  const handleToggleColumnVisibility = (field:string) => {
-    if(hiddenColumns.includes(field)) setHiddenColumns(currState => currState.filter(item => item != field))
-    else setHiddenColumns(currState => [...currState, field])
-  }
+  const handleToggleColumnVisibility = (field: string) => {
+    if (hiddenColumns.includes(field))
+      setHiddenColumns((currState) =>
+        currState.filter((item) => item != field)
+      );
+    else setHiddenColumns((currState) => [...currState, field]);
+  };
   return (
     <div className="px-8 pb-8 overflow-x-auto">
       <div className="w-full border border-grey-border rounded-custom8px mb-10">
@@ -171,6 +371,147 @@ const TableTemplate = ({tableColumns, tableData, hideToolbar=false, showActionCo
                   </div>
                 )}
               </div>
+              {/* Filter button */}
+              <div className="relative">
+                <button
+                  className="flex items-center gap-2 text-[14px] font-inter font-[500] text-textHeading"
+                  onClick={() => {
+                    setShowFilterMenu(!showFilterMenu);
+                    setShowColumnMenu(false);
+                  }}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 14 14"
+                    fill="none"
+                  >
+                    <path
+                      d="M4.085 9.49926C4.1883 9.20657 4.37987 8.95312 4.6333 8.77384C4.88673 8.59456 5.18954 8.49828 5.5 8.49828C5.81046 8.49828 6.11327 8.59456 6.3667 8.77384C6.62013 8.95312 6.8117 9.20657 6.915 9.49926H12V10.499H6.915C6.8117 10.7917 6.62013 11.0452 6.3667 11.2244C6.11327 11.4037 5.81046 11.5 5.5 11.5C5.18954 11.5 4.88673 11.4037 4.6333 11.2244C4.37987 11.0452 4.1883 10.7917 4.085 10.499H2V9.49926H4.085ZM7.085 6.00012C7.1883 5.70743 7.37987 5.45397 7.6333 5.27469C7.88673 5.09542 8.18954 4.99914 8.5 4.99914C8.81046 4.99914 9.11327 5.09542 9.3667 5.27469C9.62013 5.45397 9.8117 5.70743 9.915 6.00012H12V6.99988H9.915C9.8117 7.29257 9.62013 7.54603 9.3667 7.72531C9.11327 7.90458 8.81046 8.00086 8.5 8.00086C8.18954 8.00086 7.88673 7.90458 7.6333 7.72531C7.37987 7.54603 7.1883 7.29257 7.085 6.99988H2V6.00012H7.085ZM4.085 2.50098C4.1883 2.20829 4.37987 1.95483 4.6333 1.77555C4.88673 1.59627 5.18954 1.5 5.5 1.5C5.81046 1.5 6.11327 1.59627 6.3667 1.77555C6.62013 1.95483 6.8117 2.20829 6.915 2.50098H12V3.50073H6.915C6.8117 3.79343 6.62013 4.04688 6.3667 4.22616C6.11327 4.40544 5.81046 4.50171 5.5 4.50171C5.18954 4.50171 4.88673 4.40544 4.6333 4.22616C4.37987 4.04688 4.1883 3.79343 4.085 3.50073H2V2.50098H4.085Z"
+                      fill="#636363"
+                    />
+                  </svg>
+                  Filter
+                </button>
+
+                {showFilterMenu && (
+                  <div
+                    ref={filterMenuRef}
+                    className="absolute z-10 mt-2 w-64 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"
+                  >
+                    <div className="py-1 px-2">
+                      <div className="py-2">
+                        <select
+                          className="block w-full rounded-md text-[12px] font-inter font-[500] py-2 pl-3 pr-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                          id="filter-field"
+                          value={
+                            appliedFilter ? Object.keys(appliedFilter)[0] : ""
+                          }
+                          onChange={(e) =>
+                            handleAppliedFilterChange(e.target.value)
+                          }
+                        >
+                          <option
+                            value=""
+                            disabled
+                            className="text-[14px] font-inter font-[500]"
+                          >
+                            Select field
+                          </option>
+                          {tableColumns.map((column) => (
+                            <option
+                              key={column.field}
+                              className="text-[12px] font-inter font-[500]"
+                              value={column.field}
+                            >
+                              {column.headerName}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Date filter specific controls */}
+                      {appliedFilterType === "date" && enableDateFilters && (
+                        <div className="py-2">
+                          <select
+                            className="block w-full rounded-md text-[12px] font-inter font-[500] py-2 pl-3 pr-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                            value={dateOperator}
+                            onChange={(e) =>
+                              setDateOperator(e.target.value as any)
+                            }
+                          >
+                            <option value="equals">Equals</option>
+                            <option value="before">Before</option>
+                            <option value="after">After</option>
+                            <option value="between">Between</option>
+                          </select>
+                        </div>
+                      )}
+
+                      {/* Regular filter input or start date for date filters */}
+                      <div className="py-2">
+                        {appliedFilterType === "date" && enableDateFilters ? (
+                          <input
+                            type="date"
+                            id="filter-date"
+                            value={startDate}
+                            // onChange={(e) => handleFilterValueChange(e.target.value)}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            className="block w-full rounded-md border-reloadBorder border py-2 pl-3 pr-3 text-[12px] font-inter font-[500] 
+                          focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            value={
+                              appliedFilter &&
+                              Object.keys(appliedFilter).length > 0
+                                ? appliedFilter[Object.keys(appliedFilter)[0]]
+                                : ""
+                            }
+                            id="filter-value"
+                            onChange={(e) =>
+                              handleFilterValueChange(e.target.value)
+                            }
+                            placeholder="Filter value"
+                            className="block w-full rounded-md border-reloadBorder border py-2 pl-3 pr-3 text-[12px] font-inter font-[500] 
+                          focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                          />
+                        )}
+                      </div>
+
+                      {/* End date input for "between" date operator */}
+                      {appliedFilterType === "date" &&
+                        dateOperator === "between" &&
+                        enableDateFilters && (
+                          <div className="py-2">
+                            <label className="block text-[12px] font-inter font-[500] mb-1">
+                              End Date
+                            </label>
+                            <input
+                              type="date"
+                              value={endDate}
+                              onChange={(e) => setEndDate(e.target.value)}
+                              className="block w-full rounded-md border-reloadBorder border py-2 pl-3 pr-3 text-[12px] font-inter font-[500] 
+                          focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                            />
+                          </div>
+                        )}
+
+                      <div className="py-2">
+                        <button
+                          type="button"
+                          className="inline-flex w-full justify-center rounded-md border border-transparent bg-bgButton px-4 py-2 text-sm font-inter text-whiteColor font-[12px] shadow-sm focus:outline-none focus:ring-2 focus:ring-bgButton focus:ring-offset-2"
+                          onClick={() => setAppliedFilter(null)}
+                        >
+                          Clear Filter
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -180,7 +521,7 @@ const TableTemplate = ({tableColumns, tableData, hideToolbar=false, showActionCo
               <th className="p-4">
                 <input
                   type="checkbox"
-                  checked={selectedRows.length === paginatedData.length}
+                  checked={selectedRows.length === filteredData.length}
                   onChange={handleSelectAll}
                   className="h-4 w-4 rounded border-btnBorder focus:ring-bgButton accent-bgButton"
                 />
@@ -203,7 +544,7 @@ const TableTemplate = ({tableColumns, tableData, hideToolbar=false, showActionCo
             </tr>
           </thead>
           <tbody>
-            {paginatedData.map((row) => (
+            {filteredData.map((row) => (
               <tr
                 key={row.id}
                 className="border-b border-gray-200 bg-store-card"

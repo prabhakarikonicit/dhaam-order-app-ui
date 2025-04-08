@@ -20,6 +20,14 @@ export interface Order extends TableData{
     price: string;
   }
 
+  export interface Filter {
+    field: string;
+    value: string;
+    type?: "text" | "date" | "number";
+    dateOperator?: "equals" | "before" | "after" | "between";
+    endDate?: string;
+  }
+
   export interface TableColumns {
     field: string;
     headerName: string;

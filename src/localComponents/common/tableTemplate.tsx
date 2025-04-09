@@ -8,6 +8,8 @@ const TableTemplate = ({
   showActionColumn = false,
   enableDateFilters = false,
   densityFirst = false, // Default to false for backward compatibility
+  selectedRows= null,
+  setSelectedRows = null
 }: {
   tableColumns: TableColumns[];
   tableData: TableData[];
@@ -15,6 +17,8 @@ const TableTemplate = ({
   showActionColumn?: boolean;
   enableDateFilters?: boolean;
   densityFirst?: boolean;
+  selectedRows?: string[] | null,
+  setSelectedRows?: React.Dispatch<React.SetStateAction<string[]>> | null;
 }) => {
   const [filteredData, setFilteredData] = useState<TableData[]>([]);
 
@@ -24,7 +28,6 @@ const TableTemplate = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [hiddenColumns, setHiddenColumns] = useState<string[]>([]);
-  const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("2025-02-28");
   const [density, setDensity] = useState<
@@ -273,7 +276,7 @@ const TableTemplate = ({
   }, [appliedFilter, dateOperator, startDate, endDate]);
 
   const handleSelectRow = (id: string) => {
-    setSelectedRows((currState) => {
+    setSelectedRows && setSelectedRows((currState) => {
       if (currState.includes(id)) {
         return currState.filter((rowId) => rowId !== id);
       } else {
@@ -285,9 +288,9 @@ const TableTemplate = ({
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     const isSelected = event.target.checked;
     if (isSelected) {
-      setSelectedRows(filteredData.map((order) => order.id));
+      setSelectedRows && setSelectedRows(filteredData.map((order) => order.id));
     } else {
-      setSelectedRows([]);
+      setSelectedRows && setSelectedRows([]);
     }
   };
 
@@ -687,14 +690,14 @@ const TableTemplate = ({
         <table className="w-full border-collapse table-auto">
           <thead>
             <tr className="border-b border-gray-200 bg-background-grey">
-              <th className="p-4">
+              {selectedRows && <th className="p-4">
                 <input
                   type="checkbox"
-                  checked={selectedRows.length === filteredData.length}
+                  checked={selectedRows ? selectedRows.length === filteredData.length:false}
                   onChange={handleSelectAll}
                   className="h-4 w-4 rounded border-btnBorder focus:ring-bgButton accent-bgButton"
                 />
-              </th>
+              </th>}
               {tableColumns
                 .filter((column) => !hiddenColumns.includes(column.field))
                 .map((col) => (
@@ -718,14 +721,14 @@ const TableTemplate = ({
                 key={row.id}
                 className="border-b border-gray-200 bg-store-card"
               >
-                <td className="p-4">
+               {selectedRows && <td className="p-4">
                   <input
                     type="checkbox"
-                    checked={selectedRows.includes(row.id)}
+                    checked={selectedRows ? selectedRows.includes(row.id): false}
                     onChange={() => handleSelectRow(row.id)}
                     className="h-4 w-4 rounded border border-gray-300 focus:ring-bgButton accent-bgButton"
                   />
-                </td>
+                </td>}
                 {tableColumns
                   .filter((column) => !hiddenColumns.includes(column.field))
                   .map((col) => (

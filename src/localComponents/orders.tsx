@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import TableTemplate from "./common/tableTemplate";
 import CustomModal from "./common/modals";
 import { Order, TableColumns } from "../types";
 const Orders = () => {
-
+const [selectedRows, setSelectedRows] = useState<string[]>([])
   const renderStatus = (status: string) => {
     const statusStyles: { [key: string]: string } = {
       Pending: "bg-[#FFF7E6] text-[#DD9E06] border border-[#F5D78E]",
@@ -363,7 +363,7 @@ const Orders = () => {
   };
   return (
   <>
-  <TableTemplate tableColumns={columns} tableData={orders} enableDateFilters={true} densityFirst={true}/>
+  <TableTemplate tableColumns={columns} tableData={orders} enableDateFilters={true} densityFirst={true} selectedRows={selectedRows} setSelectedRows={setSelectedRows}/>
   {isModalOpen &&
         (modalMode === "payment" ? (
           <CustomModal

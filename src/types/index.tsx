@@ -31,7 +31,7 @@ export interface Order extends TableData{
   export interface TableColumns {
     field: string;
     headerName: string;
-    type?: "text" | "date" | "number";
+    type?: "text" | "date" | "number" | "jsx";
   }
 
   export interface TableData {

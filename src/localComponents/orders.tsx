@@ -266,7 +266,7 @@ const Orders = () => {
     {
       field: "status",
       headerName: "Status",
-      type: "text",
+      type: "jsx",
     },
     {
       field: "store",
@@ -311,7 +311,7 @@ const Orders = () => {
     {
       field: "paymentMethod",
       headerName: "Payment Method",
-      type: "text",
+      type: "jsx",
       // renderCell: (value, row) => renderPaymentMethod(value, row),
     },
   ];

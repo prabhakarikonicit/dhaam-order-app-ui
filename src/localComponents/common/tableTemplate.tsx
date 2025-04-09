@@ -39,7 +39,7 @@ const TableTemplate = ({
     [column: string]: string;
   } | null>(null);
   const [appliedFilterType, setAppliedFilterType] = useState<
-    "text" | "date" | "number"
+    "text" | "date" | "number" | "jsx"
   >("text");
   const [dateOperator, setDateOperator] = useState<
     "equals" | "before" | "after" | "between"
@@ -197,16 +197,18 @@ const TableTemplate = ({
   };
 
   useEffect(() => {
-    console.log("appliedFilter", appliedFilter);
     let result = tableData;
     if (appliedFilter && Object.keys(appliedFilter).length > 0) {
       const filterColumn = Object.keys(appliedFilter)[0];
       const filterValue = appliedFilter[filterColumn];
+      const filterType = tableColumns.find((col) => col.field == filterColumn)?.type;
       if (filterColumn && filterValue) {
-        result = result.filter((item) => {
-          const tableCell = String(item[filterColumn]).toLowerCase();
-          return tableCell.toLowerCase().includes(filterValue.toLowerCase());
-        });
+          result = result.filter((item) => {
+            const tableCell = filterType == 'jsx' ? item[filterColumn].props.children: String(item[filterColumn]);
+            return tableCell.toLowerCase().includes(filterValue.toLowerCase());
+          });
+
+        
       }
       if (filterColumn && appliedFilterType == "date") {
         if (startDate && startDate != "" && dateOperator != "between") {
@@ -391,6 +393,55 @@ const TableTemplate = ({
         currState.filter((item) => item != field)
       );
     else setHiddenColumns((currState) => [...currState, field]);
+  };
+
+  // Handle export to CSV
+  const exportToCSV = () => {
+    // Get visible columns
+    const visibleColumns = tableColumns.filter((col) => !hiddenColumns.includes(col.field));
+
+    // Create header row
+    const headerRow = visibleColumns.map((col) => col.headerName);
+
+    // Create data rows
+    const dataRows = filteredData.map((row) => {
+      return visibleColumns.map((col) => {
+        const value = col.type == 'jsx' ? row[col.field].props.children: row[col.field];
+        return value !== null && value !== undefined ? String(value) : "";
+
+        // // Handle special cases
+        // if (col.field === "status") {
+        //   return value;
+        // } else if (col.field === "amount" && typeof value === "number") {
+        //   return value.toFixed(2);
+        // } else if (
+        //   col.field === "date" ||
+        //   col.field === "transactionDate" ||
+        //   col.field === "createdOn"
+        // ) {
+        //   return value;
+        // } else {
+        //   return value !== null && value !== undefined ? String(value) : "";
+        // }
+      });
+    });
+
+    // Combine header and data rows
+    const csvContent = [
+      headerRow.join(","),
+      ...dataRows.map((row) => row.join(",")),
+    ].join("\n");
+
+    // Create blob and download link
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "DataExport.csv");
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
   return (
     <div className="px-8 pb-8 overflow-x-auto">
@@ -601,6 +652,35 @@ const TableTemplate = ({
               </div>
               {/* Render density button before export if densityFirst is true */}
             {densityFirst && renderDensityButton()}
+
+            {/* Export button */}
+            <button
+              className="flex items-center gap-2 text-[14px] font-inter font-[500] text-textHeading"
+              onClick={exportToCSV}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                fill="none"
+              >
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M2.09961 11.9C2.09961 11.5134 2.41301 11.2 2.79961 11.2H11.1996C11.5862 11.2 11.8996 11.5134 11.8996 11.9C11.8996 12.2866 11.5862 12.6 11.1996 12.6H2.79961C2.41301 12.6 2.09961 12.2866 2.09961 11.9ZM4.40463 6.50502C4.678 6.23165 5.12122 6.23165 5.39458 6.50502L6.29961 7.41004L6.29961 2.09999C6.29961 1.71339 6.61301 1.39999 6.99961 1.39999C7.38621 1.39999 7.69961 1.71339 7.69961 2.09999L7.69961 7.41004L8.60463 6.50502C8.878 6.23165 9.32122 6.23165 9.59458 6.50502C9.86795 6.77839 9.86795 7.2216 9.59458 7.49497L7.49458 9.59497C7.36331 9.72624 7.18526 9.79999 6.99961 9.79999C6.81396 9.79999 6.63591 9.72624 6.50463 9.59497L4.40463 7.49497C4.13127 7.2216 4.13127 6.77839 4.40463 6.50502Z"
+                  fill="#636363"
+                />
+              </svg>
+              {!isMobile && (
+                <span className="text-[14px] font-inter font-[500] text-textHeading">
+                  Export
+                </span>
+              )}
+            </button>
+
+            {/* Render density button after export if densityFirst is false */}
+            {!densityFirst && renderDensityButton()}
             </div>
           </div>
         )}

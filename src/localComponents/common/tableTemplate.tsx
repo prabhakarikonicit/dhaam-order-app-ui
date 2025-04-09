@@ -1,17 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
 import { TableColumns, Order, TableData, Filter } from "../../types";
+import useMobileView from "./hooks/useMobileView";
 const TableTemplate = ({
   tableColumns,
   tableData,
   hideToolbar = false,
   showActionColumn = false,
   enableDateFilters = false,
+  densityFirst = false, // Default to false for backward compatibility
 }: {
   tableColumns: TableColumns[];
   tableData: TableData[];
   hideToolbar?: boolean;
   showActionColumn?: boolean;
   enableDateFilters?: boolean;
+  densityFirst?: boolean;
 }) => {
   const [filteredData, setFilteredData] = useState<TableData[]>([]);
 
@@ -27,6 +30,9 @@ const TableTemplate = ({
   const [density, setDensity] = useState<
     "compact" | "standard" | "comfortable"
   >("standard");
+  const [showDensityMenu, setShowDensityMenu] = useState(false);
+   // Check if we're on mobile
+   const isMobile = useMobileView();
   const [showColumnMenu, setShowColumnMenu] = useState(false);
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const [appliedFilter, setAppliedFilter] = useState<{
@@ -42,6 +48,7 @@ const TableTemplate = ({
   // Refs for handling outside clicks
   const columnMenuRef = useRef<HTMLDivElement>(null);
   const filterMenuRef = useRef<HTMLDivElement>(null);
+  const densityMenuRef = useRef<HTMLDivElement>(null);
 
   // Sample data initialization with createdDate field
   useEffect(() => {
@@ -67,12 +74,12 @@ const TableTemplate = ({
       ) {
         setShowFilterMenu(false);
       }
-      // if (
-      //   densityMenuRef.current &&
-      //   !densityMenuRef.current.contains(event.target as Node)
-      // ) {
-      //   setShowDensityMenu(false);
-      // }
+      if (
+        densityMenuRef.current &&
+        !densityMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowDensityMenu(false);
+      }
       // if (
       //   datePickerRef.current &&
       //   !datePickerRef.current.contains(event.target as Node)
@@ -169,18 +176,18 @@ const TableTemplate = ({
   };
 
   // Handle field selection for filters
-  const handleFilterFieldChange = (field: string) => {
-    setAppliedFilter(field);
-    const selectedColumn = tableColumns.find((col) => col.field === field);
-    setAppliedFilterType(selectedColumn?.type || "text");
+  // const handleFilterFieldChange = (field: string) => {
+  //   setAppliedFilter(field);
+  //   const selectedColumn = tableColumns.find((col) => col.field === field);
+  //   setAppliedFilterType(selectedColumn?.type || "text");
 
-    // Reset date-specific states when changing fields
-    if (selectedColumn?.type !== "date") {
-      setDateOperator("equals");
-      setStartDate("");
-      setEndDate("");
-    }
-  };
+  //   // Reset date-specific states when changing fields
+  //   if (selectedColumn?.type !== "date") {
+  //     setDateOperator("equals");
+  //     setStartDate("");
+  //     setEndDate("");
+  //   }
+  // };
 
   const handleFilterValueChange = (value: string) => {
     if (appliedFilter && Object.keys(appliedFilter).length > 0) {
@@ -280,6 +287,86 @@ const TableTemplate = ({
     } else {
       setSelectedRows([]);
     }
+  };
+
+  // Render density button
+  const renderDensityButton = () => {
+
+    return (
+      <div className="relative">
+        <button
+          className="flex items-center gap-2 text-[14px] font-inter font-[500] text-textHeading"
+          onClick={() => setShowDensityMenu(!showDensityMenu)}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 14 14"
+            fill="none"
+          >
+            <path
+              d="M12.25 4.66659H1.75V2.33325H12.25V4.66659ZM12.25 5.83325H1.75V8.16659H12.25V5.83325ZM12.25 9.33325H1.75V11.6666H12.25V9.33325Z"
+              fill="#636363"
+            />
+          </svg>
+          {!isMobile && (
+            <span className="text-[14px] font-inter font-[500] text-textHeading">
+              Density
+            </span>
+          )}
+        </button>
+
+        {showDensityMenu && (
+          <div
+            className="absolute z-10 mt-2 w-40 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"
+            ref={densityMenuRef}
+          >
+            <div className="py-1">
+              <button
+                className={`block w-full text-left px-4 py-2 text-[12px] font-inter font-[500] text-textHeading ${
+                  density === "comfortable"
+                    ? "bg-gray-100"
+                    : ""
+                }`}
+                onClick={() => {
+                  setDensity("comfortable");
+                  setShowDensityMenu(false);
+                }}
+              >
+                Comfortable
+              </button>
+              <button
+                className={`block w-full text-left px-4 py-2 text-[12px] font-inter font-[500] text-textHeading ${
+                  density === "standard"
+                    ? "bg-gray-100"
+                    : ""
+                }`}
+                onClick={() => {
+                  setDensity("standard");
+                  setShowDensityMenu(false);
+                }}
+              >
+                Standard
+              </button>
+              <button
+                className={`block w-full text-left px-4 py-2 text-[12px] font-inter font-[500] text-textHeading ${
+                  density === "compact"
+                    ? "bg-gray-100"
+                    : ""
+                }`}
+                onClick={() => {
+                  setDensity("compact");
+                  setShowDensityMenu(false);
+                }}
+              >
+                Compact
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   // const filterByDateRange = (
@@ -512,6 +599,8 @@ const TableTemplate = ({
                   </div>
                 )}
               </div>
+              {/* Render density button before export if densityFirst is true */}
+            {densityFirst && renderDensityButton()}
             </div>
           </div>
         )}

@@ -363,7 +363,7 @@ const Orders = () => {
   };
   return (
   <>
-  <TableTemplate tableColumns={columns} tableData={orders} enableDateFilters={true}/>
+  <TableTemplate tableColumns={columns} tableData={orders} enableDateFilters={true} densityFirst={true}/>
   {isModalOpen &&
         (modalMode === "payment" ? (
           <CustomModal

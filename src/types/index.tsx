@@ -35,6 +35,7 @@ export interface Order extends TableData{
     field: string;
     headerName: string;
     type?: "text" | "date" | "number" | "jsx";
+    sort?:boolean
   }
 
   export interface TableData {

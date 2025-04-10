@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { TableColumns, Order, TableData, Filter } from "../../types";
+import SortIcon from "../../assets/images/Icon.svg";
 import useMobileView from "./hooks/useMobileView";
 const TableTemplate = ({
   tableColumns,
@@ -30,8 +31,8 @@ const TableTemplate = ({
   const [currentPageSize, setCurrentPageSize] = useState(pageSize);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchValue, setSearchValue] = useState<string>("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [sortOrder, setSortOrder] = useState("none");
+  const [sortColumn, setSortColumn] = useState("");
   const [hiddenColumns, setHiddenColumns] = useState<string[]>([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("2025-02-28");
@@ -368,13 +369,33 @@ const TableTemplate = ({
         }
       }
     }
+
+    // Apply sorting if sortOrder is set
+    if (sortOrder != 'none') {
+      const sorColType = tableColumns.find(col => col.field == sortColumn)?.type;
+      result = [...result].sort((a, b) => {
+        let aValue = sorColType && sorColType == 'jsx' ? String(a[sortColumn].value) : String(a[sortColumn]);
+        aValue = aValue ? aValue : '';
+        let bValue = sorColType && sorColType == 'jsx' ? String(b[sortColumn].value) : String(b[sortColumn]);
+        bValue = bValue ? bValue : '';
+          console.log('abVal', aValue, bValue)
+
+            if (aValue.toLowerCase() < bValue.toLowerCase()) {
+              return sortOrder === "asc" ? -1 : 1;
+            } else if (aValue.toLowerCase() > bValue.toLowerCase()) {
+              return sortOrder === "asc" ? 1 : -1;
+            }
+            return 0;
+      });
+    }
+
     if (!appliedFilter) {
       setDateOperator("equals");
       setStartDate("");
       setAppliedFilterType("text");
     }
     setFilteredData(result);
-  }, [appliedFilter, searchValue, dateOperator, startDate, endDate]);
+  }, [appliedFilter, searchValue, dateOperator, startDate, endDate, sortOrder]);
 
   const handleSelectRow = (id: string) => {
     setSelectedRows && setSelectedRows((currState) => {
@@ -832,9 +853,32 @@ const TableTemplate = ({
                 .map((col) => (
                   <th
                     key={col.field}
-                    className="text-left p-4 font-inter font-[600] text-headding-color bg-background-grey"
+                    className="text-left p-2 font-inter font-[600] text-headding-color bg-background-grey whitespace-nowra"
                   >
-                    {col.headerName}
+                    {/* {col.headerName} */}
+                    <div className="flex items-center">
+                        <span className="font-inter font-[600] text-headding-color">
+                          {col.headerName}
+                        </span>
+                        {col.sort && (
+                          <button
+                            onClick={() => {
+                              setSortColumn(col.field);
+                              if (sortOrder === "none") setSortOrder("desc");
+                              if (sortOrder === "desc") setSortOrder("asc");
+                              if (sortOrder === "asc") setSortOrder("none");
+                             
+                            }}
+                            className="ml-2"
+                          >
+                            <img
+                              src={SortIcon}
+                              alt="Sort Icon"
+                              className="w-[16px] h-[16px] cursor-pointer"
+                            />
+                          </button>
+                        )}
+                      </div>
                   </th>
                 ))}
               {showActionColumn && (

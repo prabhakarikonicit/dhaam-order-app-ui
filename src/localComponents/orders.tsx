@@ -364,6 +364,7 @@ const [selectedRows, setSelectedRows] = useState<string[]>([])
       field: "orderId",
       headerName: "Order ID",
       type: "jsx",
+      sort:true
     },
     {
       field: "amount",
@@ -379,6 +380,7 @@ const [selectedRows, setSelectedRows] = useState<string[]>([])
       field: "store",
       headerName: "Store",
       type: "text",
+      sort:true
     },
     {
       field: "deliveryAddress",

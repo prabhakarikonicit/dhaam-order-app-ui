@@ -4,53 +4,131 @@ import CustomModal from "./common/modals";
 import { Order, TableColumns } from "../types";
 const Orders = () => {
 const [selectedRows, setSelectedRows] = useState<string[]>([])
-  const renderStatus = (status: string) => {
-    const statusStyles: { [key: string]: string } = {
-      Pending: "bg-[#FFF7E6] text-[#DD9E06] border border-[#F5D78E]",
-      Completed: "bg-[#EAF8E9] text-[#1A8917] border border-[#A5E0A2]",
-      Dispatched: "bg-[#E9F1FB] text-[#3172D7] border border-[#A0C5F7]",
-      Cancelled: "bg-[#FFEAEA] text-[#DD0606] border border-[#F7A0A0]",
-      "Out for delivery": "bg-[#EAE9FB] text-[#3F31D7] border border-[#C3A0F7]",
+  // Function to render status with appropriate styling
+  const renderStatus = (value:string) => {
+    // Status styles for status badges
+    const statusStyles: {
+      [key: string]: {
+        textColor: string;
+        bgColor: string;
+      };
+    } = {
+      Pending: {
+        textColor: "text-yellow",
+        bgColor: "bg-orangeColor",
+      },
+      Completed: {
+        textColor: "text-green",
+        bgColor: "bg-customBackgroundColor",
+      },
+      "Out for delivery": {
+        textColor: "text-primary",
+        bgColor: "bg-primary",
+      },
+      Cancelled: {
+        textColor: "text-maroon",
+        bgColor: "bg-bgCrossIcon",
+      },
     };
 
-    return (
-      <div
-        className={`px-3 py-1 text-center rounded-custom4px font-inter text-[12px] font-[500] ${
-          statusStyles[status] || ""
-        }`}
-      >
-        {status}
+    // Reject icon (red X)
+    const rejectIcon = (
+      <div className="flex justify-center items-center w-8 h-8 rounded-custom border border-borderCrossIcon bg-bgCrossIcon"> 
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="15"
+          height="14"
+          viewBox="0 0 15 14"
+          fill="none"
+        >
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M3.50501 3.00501C3.77838 2.73165 4.2216 2.73165 4.49496 3.00501L7.49999 6.01004L10.505 3.00501C10.7784 2.73165 11.2216 2.73165 11.495 3.00501C11.7683 3.27838 11.7683 3.7216 11.495 3.99496L8.48994 6.99999L11.495 10.005C11.7683 10.2784 11.7683 10.7216 11.495 10.995C11.2216 11.2683 10.7784 11.2683 10.505 10.995L7.49999 7.98994L4.49496 10.995C4.2216 11.2683 3.77838 11.2683 3.50501 10.995C3.23165 10.7216 3.23165 10.2784 3.50501 10.005L6.51004 6.99999L3.50501 3.99496C3.23165 3.7216 3.23165 3.27838 3.50501 3.00501Z"
+            fill="#620E0E"
+          />
+        </svg>
       </div>
     );
-  };
-  const renderPaymentMethod = (method: string, orderId:string) => {
-    const methodStyles: { [key: string]: string } = {
-      Cash: "bg-[#1A8917] text-white cursor-pointer hover:bg-[#157512]",
-      UPI: "bg-[#DD9E06] text-white",
-      "Credit Card": "bg-[#3172D7] text-white",
-    };
 
-    // Only make Cash payment method clickable
-    if (method === "Cash") {
+    // Accept icon (green checkmark)
+    const acceptIcon = (
+      <div className="flex justify-center items-center w-8 h-8 rounded-custom border border-borderGreeen bg-customBackgroundColor ml-2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="15"
+          height="14"
+          viewBox="0 0 15 14"
+          fill="none"
+        >
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M12.1949 3.70503C12.4683 3.97839 12.4683 4.42161 12.1949 4.69497L6.59495 10.295C6.32158 10.5683 5.87837 10.5683 5.605 10.295L2.805 7.49497C2.53163 7.22161 2.53163 6.77839 2.805 6.50503C3.07837 6.23166 3.52158 6.23166 3.79495 6.50503L6.09998 8.81005L11.205 3.70503C11.4784 3.43166 11.9216 3.43166 12.1949 3.70503Z"
+            fill="#125E1B"
+          />
+        </svg>
+      </div>
+    );
+
+    // For rows that should show status text badges (Pending, Completed, Out for delivery, Cancelled)
+    if (
+      value &&
+      ["Pending", "Completed", "Cancelled", "Out for delivery"].includes(value)
+    ) {
+      const statusConfig = statusStyles[value] || {
+        textColor: "text-gray-600",
+        bgColor: "bg-gray-100",
+      };
+
       return (
         <div
-          className={`py-1 text-center rounded-custom4px font-inter text-[12px] font-[500] ${
-            methodStyles[method] || ""
-          }`}
-          onClick={() => handleOpenPaymentModal(orderId)}
-          role="button"
-          aria-label="View payment details"
+          className={`px-3 py-1 rounded-custom80px  ${statusConfig.bgColor} ${statusConfig.textColor} 
+          font-inter text-[12px] font-[600] whitespace-nowrap inline-block`}
         >
-          {method}
+          {value}
         </div>
       );
     }
 
+    // For rows that should show the reject/accept icons (empty status value)
+    return (
+      <div className="flex items-center">
+        {rejectIcon}
+        {acceptIcon}
+      </div>
+    );
+  };
+
+  // Function to render payment method with appropriate styling
+  const renderPaymentMethod = (method: string, orderId: string) => {
+    let styleClass = "";
+    let widthClass = "";
+
+    // Safe approach to determine styles based on method value
+    if (method === "Cash") {
+      styleClass =
+        "bg-bgActive rounded-custom4x text-customWhiteColor font-inter font-[600] ";
+      widthClass = "w-16";
+    } else if (method === "UPI") {
+      styleClass =
+        "bg-yellow rounded-custom4x text-yellow font-inter font-[600]";
+      widthClass = "w-16";
+    } else if (method === "Credit Card") {
+      styleClass =
+        "bg-blueCredit rounded-custom4x text-primaryCredit font-inter font-[600]";
+      widthClass = "w-32";
+    }
+  
+
     return (
       <div
-        className={`px-3 py-1 text-center rounded-custom4px font-inter text-[12px] font-[500] ${
-          methodStyles[method] || ""
-        }`}
+        className={`py-1 px-2 text-center whitespace-nowrap rounded-lg font-inter text-[14px] font-[500] ${styleClass} ${widthClass}`}
+        onClick={
+          method === "Cash" ? () => handleOpenPaymentModal(orderId) : undefined
+        }
+        role={method === "Cash" ? "button" : undefined}
+        aria-label={method === "Cash" ? "View payment details" : undefined}
       >
         {method}
       </div>
@@ -94,130 +172,130 @@ const [selectedRows, setSelectedRows] = useState<string[]>([])
       id: '1',
       orderId: "#20345",
       amount: "₹100.00",
-      status: renderStatus("Completed"),
+      status: {jsx:renderStatus(""),value:"New"},
       store: "Queenstown Public House",
       deliveryAddress: "6391 Elgin St. Celina, Delaware 10299",
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Cash", '1'),
+      paymentMethod: {jsx:renderPaymentMethod("Cash", '1'),value:"Cash"},
       createdDate: "2025-02-12",
     },
     {
       id: '2',
       orderId: "#20345",
       amount: "₹100.00",
-      status: renderStatus("Pending"),
+      status: {jsx:renderStatus("Pending"), value:"Pending"},
       store: "Plumed Horse",
       deliveryAddress: "8502 Preston Rd. Inglewood, Maine 98380",
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("UPI", '2'),
+      paymentMethod: {jsx:renderPaymentMethod("UPI", '2'),value:"UPI"},
       createdDate: "2025-02-15",
     },
     {
       id: "3",
       orderId: "#20345",
       amount: "₹100.00",
-      status: renderStatus("Dispatched"),
+      status: {jsx:renderStatus(""),value:"New"},
       store: "King Lee's",
       deliveryAddress: "3517 W. Gray St. Utica, Pennsylvania 57867",
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Credit Card", '3'),
+      paymentMethod: {jsx:renderPaymentMethod("Credit Card", '3'),value:"Credit Card"},
       createdDate: "2025-02-18",
     },
     {
       id: "4",
       orderId: "#20345",
       amount: "₹100.00",
-      status: renderStatus("Cancelled"),
+      status: {jsx:renderStatus(""),value:"New"},
       store: "Marina Kitchen",
       deliveryAddress: "4140 Parker Rd. Allentown, New Mexico 31134",
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Cash", '4'),
+      paymentMethod: {jsx:renderPaymentMethod("Cash", '4'),value:"Cash"},
       createdDate: "2025-02-20",
     },
     {
       id: "5",
       orderId: "#20345",
       amount: "₹100.00",
-      status: renderStatus("Out for delivery"),
+      status: {jsx:renderStatus(""),value:"New"},
       store: "The Aviary",
       deliveryAddress: "4517 Washington Ave. Manchester, Kentucky 39495",
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("UPI", '5'),
+      paymentMethod: {jsx:renderPaymentMethod("UPI", '5'),value:"UPI"},
       createdDate: "2025-02-22",
     },
     {
       id: "6",
       orderId: "#20345",
       amount: "₹100.00",
-      status: renderStatus("Pending"),
+      status: {jsx:renderStatus(""),value:"New"},
       store: "Crab Hut",
       deliveryAddress: "2715 Ash Dr. San Jose, South Dakota 83475",
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Credit Card", '6'),
+      paymentMethod: {jsx:renderPaymentMethod("Credit Card", '6'),value:"Credit Card"},
       createdDate: "2025-02-24",
     },
     {
       id: "7",
       orderId: "#20345",
       amount: "₹100.00",
-      status: renderStatus("Completed"),
+      status: {jsx:renderStatus(""),value:"New"},
       store: "Brass Tacks",
       deliveryAddress: "2972 Westheimer Rd. Santa Ana, Illinois 85486",
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Cash", '7'),
+      paymentMethod: {jsx:renderPaymentMethod("Cash", '7'), value:"Cash"},
       createdDate: "2025-02-25",
     },
     {
       id: "8",
       orderId: "#20345",
       amount: "₹100.00",
-      status: renderStatus("Out for delivery"),
+      status: {jsx:renderStatus("Completed"),value:"Completed"},
       store: "Bean Around the World Coffees",
       deliveryAddress: "2715 Ash Dr. San Jose, South Dakota 83475",
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("UPI", '8'),
+      paymentMethod: {jsx:renderPaymentMethod("UPI", '8'),value:"UPI"},
       createdDate: "2025-02-26",
     },
     {
       id: "9",
       orderId: "#20345",
       amount: "₹100.00",
-      status: renderStatus("Cancelled"),
+      status: {jsx:renderStatus("Cancelled"),value:"Cancelled"},
       store: "Chewy Balls",
       deliveryAddress: "1901 Thornridge Cir. Shiloh, Hawaii 81063",
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Credit Card", '9'),
+      paymentMethod: {jsx:renderPaymentMethod("Credit Card", '9'),value:"Credit Card"},
       createdDate: "2025-02-27",
     },
     {
       id: "10",
       orderId: "#20345",
       amount: "₹100.00",
-      status: renderStatus("Out for delivery"),
+      status: {jsx:renderStatus("Out for delivery"),value:"Out for delivery"},
       store: "Proxi",
       deliveryAddress: "2118 Thornridge Cir. Syracuse, Connecticut 35624",
       deliveryMode: "Home delivery",
       scheduleTime: "06:30 PM",
       scheduleDate: "January 26",
-      paymentMethod: renderPaymentMethod("Cash", '10'),
+      paymentMethod: {jsx:renderPaymentMethod("Cash", '10'),value:"Cash"},
       createdDate: "2025-02-28",
     },
   ]);

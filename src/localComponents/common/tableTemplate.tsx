@@ -282,7 +282,7 @@ const TableTemplate = ({
       const filterType = tableColumns.find((col) => col.field == filterColumn)?.type;
       if (filterColumn && filterValue) {
           result = result.filter((item) => {
-            const tableCell = filterType == 'jsx' ? item[filterColumn].props.children: String(item[filterColumn]);
+            const tableCell = filterType == 'jsx' ? item[filterColumn].value: String(item[filterColumn]);
             return tableCell.toLowerCase().includes(filterValue.toLowerCase());
           });
 
@@ -484,7 +484,7 @@ const TableTemplate = ({
     // Create data rows
     const dataRows = filteredData.map((row) => {
       return visibleColumns.map((col) => {
-        const value = col.type == 'jsx' ? row[col.field].props.children: row[col.field];
+        const value = col.type == 'jsx' ? row[col.field].value: row[col.field];
         return value !== null && value !== undefined ? String(value) : "";
 
         // // Handle special cases
@@ -816,7 +816,7 @@ const TableTemplate = ({
                     >
                       <div>
                         <div className="text-[14px] font-inter font-[500] text-cardValue leading-[21px]">
-                          {row[col.field]}
+                          {col.type == 'jsx' ? row[col.field].jsx:row[col.field]}
                         </div>
                       </div>
                     </td>

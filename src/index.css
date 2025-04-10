@@ -54,11 +54,13 @@
   --color-validationSucColor: #575757;
   --color-cancelPlanText: #BB1B1;
   --color-primary: #2242b4;
+  --color-primaryCredit: #EAEDFB;
   --color-customWhiteColor: #eafbec;
   --color-yellow: #735c17;
   --color-customWhite: #fbe9e9;
   --color-billingNumber: #1d3796;
   --color-green: #125e1b;
+  --color-maroon: #9C1616;
   --color-headingBlack: 000B33;
 
   --background-color-background-grey: #f5f5f5;
@@ -71,6 +73,11 @@
   --background-color-green: #2c6333;
   --background-color-yellow: #ffd557;
   --background-color-maroon: #9c1616;
+  --background-color-customBackgroundColor: #EAFBEC;
+  --background-color-orangeColor: #FFF2CC;
+  --background-color-bgCrossIcon: #FBE9E9;
+  --background-color-bgActive: #1D962B;
+  --background-color-blueCredit: #506FDC;
 
   --border-color-grey-border: #dbdbdb;
   --border-color-reloadBorder: #c2c2c2;

@@ -1,15 +1,19 @@
 import { JSX } from "react";
 
+export interface JSXTableCell {
+  jsx:JSX.Element;
+  value:string;
+}
 export interface Order extends TableData{
     orderId: string;
     amount: string;
-    status:JSX.Element
+    status:JSXTableCell;
     store: string;
     deliveryAddress: string;
     deliveryMode: string;
     scheduleTime: string;
     scheduleDate: string;
-    paymentMethod: JSX.Element;
+    paymentMethod: JSXTableCell;
     createdDate?: string; // Added for date filtering
     items?: OrderItem[]; // Optional items for detailed view
   }

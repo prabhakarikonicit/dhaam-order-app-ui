@@ -44,6 +44,10 @@ export default defineConfig({
         type: "asset",
       },
       {
+        test: /\.png$/,
+        type: "asset",
+      },
+      {
         test: /\.css$/,
         use: ["postcss-loader"],
         type: "css",

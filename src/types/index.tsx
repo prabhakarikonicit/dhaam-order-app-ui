@@ -5,14 +5,13 @@ export interface JSXTableCell {
   value:string;
 }
 export interface Order extends TableData{
-    orderId: string;
+    orderId: JSXTableCell;
     amount: string;
     status:JSXTableCell;
     store: string;
     deliveryAddress: string;
-    deliveryMode: string;
-    scheduleTime: string;
-    scheduleDate: string;
+    deliveryMode: JSXTableCell;
+    scheduleDateTime: JSXTableCell;
     paymentMethod: JSXTableCell;
     createdDate?: string; // Added for date filtering
     items?: OrderItem[]; // Optional items for detailed view

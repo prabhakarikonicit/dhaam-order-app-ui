@@ -1,15 +1,15 @@
 import ReactDOM from "react-dom/client";
-
+import "./App.css";
 import "./index.css";
-import OrderDiv from "./OrderDiv";
+import Orders from "./localComponents/orders";
 
-const App = () => (
-  <div className="mt-10 text-3xl mx-auto max-w-6xl">
-    <div>Name: dhaam_order_app_ui</div>
-    <div>Framework: react-19</div>
-    <OrderDiv/>
-  </div>
-);
+const App = () => {
+  return (
+    <div>
+      <Orders />
+    </div>
+  );
+};
 
 const root = ReactDOM.createRoot(document.getElementById("app") as HTMLElement);
 

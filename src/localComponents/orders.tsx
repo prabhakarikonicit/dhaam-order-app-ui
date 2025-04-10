@@ -1,0 +1,525 @@
+import React, { useEffect, useState } from "react";
+import TableTemplate from "./common/tableTemplate";
+import CustomModal from "./common/modals";
+import UnifiedPopover from "./common/DetailsModal";
+import { Order, TableColumns } from "../types";
+const Orders = () => {
+const [selectedRows, setSelectedRows] = useState<string[]>([])
+  // Function to render status with appropriate styling
+  const renderStatus = (value:string) => {
+    // Status styles for status badges
+    const statusStyles: {
+      [key: string]: {
+        textColor: string;
+        bgColor: string;
+      };
+    } = {
+      Pending: {
+        textColor: "text-yellow",
+        bgColor: "bg-orangeColor",
+      },
+      Completed: {
+        textColor: "text-green",
+        bgColor: "bg-customBackgroundColor",
+      },
+      "Out for delivery": {
+        textColor: "text-primary",
+        bgColor: "bg-primary",
+      },
+      Cancelled: {
+        textColor: "text-maroon",
+        bgColor: "bg-bgCrossIcon",
+      },
+    };
+
+    // Reject icon (red X)
+    const rejectIcon = (
+      <div className="flex justify-center items-center w-8 h-8 rounded-custom border border-borderCrossIcon bg-bgCrossIcon"> 
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="15"
+          height="14"
+          viewBox="0 0 15 14"
+          fill="none"
+        >
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M3.50501 3.00501C3.77838 2.73165 4.2216 2.73165 4.49496 3.00501L7.49999 6.01004L10.505 3.00501C10.7784 2.73165 11.2216 2.73165 11.495 3.00501C11.7683 3.27838 11.7683 3.7216 11.495 3.99496L8.48994 6.99999L11.495 10.005C11.7683 10.2784 11.7683 10.7216 11.495 10.995C11.2216 11.2683 10.7784 11.2683 10.505 10.995L7.49999 7.98994L4.49496 10.995C4.2216 11.2683 3.77838 11.2683 3.50501 10.995C3.23165 10.7216 3.23165 10.2784 3.50501 10.005L6.51004 6.99999L3.50501 3.99496C3.23165 3.7216 3.23165 3.27838 3.50501 3.00501Z"
+            fill="#620E0E"
+          />
+        </svg>
+      </div>
+    );
+
+    // Accept icon (green checkmark)
+    const acceptIcon = (
+      <div className="flex justify-center items-center w-8 h-8 rounded-custom border border-borderGreeen bg-customBackgroundColor ml-2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="15"
+          height="14"
+          viewBox="0 0 15 14"
+          fill="none"
+        >
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M12.1949 3.70503C12.4683 3.97839 12.4683 4.42161 12.1949 4.69497L6.59495 10.295C6.32158 10.5683 5.87837 10.5683 5.605 10.295L2.805 7.49497C2.53163 7.22161 2.53163 6.77839 2.805 6.50503C3.07837 6.23166 3.52158 6.23166 3.79495 6.50503L6.09998 8.81005L11.205 3.70503C11.4784 3.43166 11.9216 3.43166 12.1949 3.70503Z"
+            fill="#125E1B"
+          />
+        </svg>
+      </div>
+    );
+
+    // For rows that should show status text badges (Pending, Completed, Out for delivery, Cancelled)
+    if (
+      value &&
+      ["Pending", "Completed", "Cancelled", "Out for delivery"].includes(value)
+    ) {
+      const statusConfig = statusStyles[value] || {
+        textColor: "text-gray-600",
+        bgColor: "bg-gray-100",
+      };
+
+      return (
+        <div
+          className={`px-3 py-1 rounded-custom80px  ${statusConfig.bgColor} ${statusConfig.textColor} 
+          font-inter text-[12px] font-[600] whitespace-nowrap inline-block`}
+        >
+          {value}
+        </div>
+      );
+    }
+
+    // For rows that should show the reject/accept icons (empty status value)
+    return (
+      <div className="flex items-center">
+        {rejectIcon}
+        {acceptIcon}
+      </div>
+    );
+  };
+
+  // Function to render payment method with appropriate styling
+  const renderPaymentMethod = (method: string, orderId: string) => {
+    let styleClass = "";
+    let widthClass = "";
+
+    // Safe approach to determine styles based on method value
+    if (method === "Cash") {
+      styleClass =
+        "bg-bgActive rounded-custom4x text-customWhiteColor font-inter font-[600] ";
+      widthClass = "w-16";
+    } else if (method === "UPI") {
+      styleClass =
+        "bg-yellow rounded-custom4x text-yellow font-inter font-[600]";
+      widthClass = "w-16";
+    } else if (method === "Credit Card") {
+      styleClass =
+        "bg-blueCredit rounded-custom4x text-primaryCredit font-inter font-[600]";
+      widthClass = "w-32";
+    }
+  
+
+    return (
+      <div
+        className={`py-1 px-2 text-center whitespace-nowrap rounded-lg font-inter text-[14px] font-[500] ${styleClass} ${widthClass}`}
+        onClick={
+          method === "Cash" ? () => handleOpenPaymentModal(orderId) : undefined
+        }
+        role={method === "Cash" ? "button" : undefined}
+        aria-label={method === "Cash" ? "View payment details" : undefined}
+      >
+        {method}
+      </div>
+    );
+  };
+
+  const renderOrderId = (value:string, orderId:string) => {
+    return (<div className="flex items-center text-cardValue font-inter font-[500] text-[12px]">
+    {value}
+    <button className="ml-2" onClick={(e) => handleOrderIdClick(e, orderId)}>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        fill="none"
+      >
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M4.23431 5.83432C4.54673 5.5219 5.05327 5.5219 5.36569 5.83432L8 8.46864L10.6343 5.83432C10.9467 5.5219 11.4533 5.5219 11.7657 5.83432C12.0781 6.14674 12.0781 6.65327 11.7657 6.96569L8.56569 10.1657C8.25327 10.4781 7.74673 10.4781 7.43431 10.1657L4.23431 6.96569C3.9219 6.65327 3.9219 6.14674 4.23431 5.83432Z"
+          fill="#2B2B2B"
+        />
+      </svg>
+    </button>
+  </div>)
+  }
+
+  const renderDeliveryMode = (value:string) => {
+    return (<div>
+      <div className="text-[12px] font-inter font-[600] text-headding-color whitespace-nowrap overflow-hidden text-ellipsis bg-subMenus p-1 rounded-custom80px text-center">
+        {value}
+      </div>
+    </div>)
+  }
+
+  const renderScheduleTime = (date:string, time:string) => {
+    return ( <div className="flex items-center justify-between w-[96px]  pr-1 mr-3">
+      <div>
+        <div className="text-[14px] font-inter  w-[80px]  font-[500] text-cardValue leading-[21px] mr-4">
+          {date}
+        </div>
+        <div className="text-[11px] font-[400] font-inter text-cardTitle">
+          {time}
+        </div>
+      </div>
+      <div className="text-gray-500 ps-0 md:p-0 sm:p-0 lg:p-0 xl:p-0">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="17"
+          height="16"
+          viewBox="0 0 17 16"
+          fill="none"
+        >
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M4.37689 5.83441C4.68931 5.52199 5.19584 5.52199 5.50826 5.83441L8.14258 8.46873L10.7769 5.83441C11.0893 5.52199 11.5958 5.52199 11.9083 5.83441C12.2207 6.14683 12.2207 6.65336 11.9083 6.96578L8.70826 10.1658C8.39584 10.4782 7.88931 10.4782 7.57689 10.1658L4.37689 6.96578C4.06447 6.65336 4.06447 6.14683 4.37689 5.83441Z"
+            fill="#2B2B2B"
+          />
+        </svg>
+      </div>
+    </div>)
+  }
+
+  const preparePaymentDetails = () => {
+    if (!selectedOrder) return undefined;
+
+    // Create sample items for the order (simulate what would come from your data)
+    const items = [
+      {
+        name: "Chicken Burger",
+        quantity: 2,
+        price: "₹100.00",
+      },
+      {
+        name: "Chicken Burger",
+        quantity: 2,
+        price: "₹100.00",
+      },
+      {
+        name: "Chicken Burger",
+        quantity: 2,
+        price: "₹100.00",
+      },
+    ];
+
+    return {
+      orderId: selectedOrder.orderId,
+      paymentMethod: selectedOrder.paymentMethod,
+      items: items,
+      total: "₹300.00",
+      store: selectedOrder.store,
+      storeAddress: "Queenstown Public House",
+      deliveryAddress: selectedOrder.deliveryAddress,
+    };
+  };
+  const [orders, setOrders] = useState<Order[]>([
+    {
+      id: '1',
+      orderId: {jsx:renderOrderId("#20345", '1'),value:"#20345"},
+      amount: "₹100.00",
+      status: {jsx:renderStatus(""),value:"New"},
+      store: "Queenstown Public House",
+      deliveryAddress: "6391 Elgin St. Celina, Delaware 10299",
+      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
+      scheduleDateTime: {jsx:renderScheduleTime("January 26","06:30 PM"),value:"January 26-06:30 PM"},
+      paymentMethod: {jsx:renderPaymentMethod("Cash", '1'),value:"Cash"},
+      createdDate: "2025-02-12",
+    },
+    {
+      id: '2',
+      orderId: {jsx:renderOrderId("#20346", '2'),value:"#20346"},
+      amount: "₹200.00",
+      status: {jsx:renderStatus("Pending"), value:"Pending"},
+      store: "Plumed Horse",
+      deliveryAddress: "8502 Preston Rd. Inglewood, Maine 98380",
+      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
+      scheduleDateTime: {jsx:renderScheduleTime("January 27","07:30 PM"),value:"January 27-07:30 PM"},
+      paymentMethod: {jsx:renderPaymentMethod("UPI", '2'),value:"UPI"},
+      createdDate: "2025-02-15",
+    },
+    {
+      id: "3",
+      orderId: {jsx:renderOrderId("#20347", '3'),value:"#20347"},
+      amount: "₹300.00",
+      status: {jsx:renderStatus(""),value:"New"},
+      store: "King Lee's",
+      deliveryAddress: "3517 W. Gray St. Utica, Pennsylvania 57867",
+      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
+      scheduleDateTime: {jsx:renderScheduleTime("May 27","12:30 PM"),value:"May 27-12:30 PM"},
+      paymentMethod: {jsx:renderPaymentMethod("Credit Card", '3'),value:"Credit Card"},
+      createdDate: "2025-02-18",
+    },
+    {
+      id: "4",
+      orderId: {jsx:renderOrderId("#20348", '4'),value:"#20348"},
+      amount: "₹400.00",
+      status: {jsx:renderStatus(""),value:"New"},
+      store: "Marina Kitchen",
+      deliveryAddress: "4140 Parker Rd. Allentown, New Mexico 31134",
+      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
+      scheduleDateTime: {jsx:renderScheduleTime("March 17","03:10 AM"),value:"March 17-03:10 AM"},
+      paymentMethod: {jsx:renderPaymentMethod("Cash", '4'),value:"Cash"},
+      createdDate: "2025-02-20",
+    },
+    {
+      id: "5",
+      orderId: {jsx:renderOrderId("#20349", '5'),value:"#20349"},
+      amount: "₹500.00",
+      status: {jsx:renderStatus(""),value:"New"},
+      store: "The Aviary",
+      deliveryAddress: "4517 Washington Ave. Manchester, Kentucky 39495",
+      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
+      scheduleDateTime: {jsx:renderScheduleTime("April 17","03:10 AM"),value:"April 17-03:10 AM"},
+      paymentMethod: {jsx:renderPaymentMethod("UPI", '5'),value:"UPI"},
+      createdDate: "2025-02-22",
+    },
+    {
+      id: "6",
+      orderId: {jsx:renderOrderId("#20350", '6'),value:"#20350"},
+      amount: "₹600.00",
+      status: {jsx:renderStatus(""),value:"New"},
+      store: "Crab Hut",
+      deliveryAddress: "2715 Ash Dr. San Jose, South Dakota 83475",
+      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
+      scheduleDateTime: {jsx:renderScheduleTime("April 17","03:10 AM"),value:"April 17-03:10 AM"},
+      paymentMethod: {jsx:renderPaymentMethod("Credit Card", '6'),value:"Credit Card"},
+      createdDate: "2025-02-24",
+    },
+    {
+      id: "7",
+      orderId: {jsx:renderOrderId("#20351", '7'),value:"#20351"},
+      amount: "₹700.00",
+      status: {jsx:renderStatus(""),value:"New"},
+      store: "Brass Tacks",
+      deliveryAddress: "2972 Westheimer Rd. Santa Ana, Illinois 85486",
+      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
+      scheduleDateTime: {jsx:renderScheduleTime("August 22","05:22 AM"),value:"August 22-05:22 AM"},
+      paymentMethod: {jsx:renderPaymentMethod("Cash", '7'), value:"Cash"},
+      createdDate: "2025-02-25",
+    },
+    {
+      id: "8",
+      orderId: {jsx:renderOrderId("#20352", '8'),value:"#20352"},
+      amount: "₹800.00",
+      status: {jsx:renderStatus("Completed"),value:"Completed"},
+      store: "Bean Around the World Coffees",
+      deliveryAddress: "2715 Ash Dr. San Jose, South Dakota 83475",
+      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
+      scheduleDateTime: {jsx:renderScheduleTime("August 22","05:22 AM"),value:"August 22-05:22 AM"},
+      paymentMethod: {jsx:renderPaymentMethod("UPI", '8'),value:"UPI"},
+      createdDate: "2025-02-26",
+    },
+    {
+      id: "9",
+      orderId: {jsx:renderOrderId("#20353", '9'),value:"#20353"},
+      amount: "₹900.00",
+      status: {jsx:renderStatus("Cancelled"),value:"Cancelled"},
+      store: "Chewy Balls",
+      deliveryAddress: "1901 Thornridge Cir. Shiloh, Hawaii 81063",
+      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
+      scheduleDateTime: {jsx:renderScheduleTime("August 22","05:22 AM"),value:"August 22-05:22 AM"},
+      paymentMethod: {jsx:renderPaymentMethod("Credit Card", '9'),value:"Credit Card"},
+      createdDate: "2025-02-27",
+    },
+    {
+      id: "10",
+      orderId: {jsx:renderOrderId("#20354", '10'),value:"#20354"},
+      amount: "₹1000.00",
+      status: {jsx:renderStatus("Out for delivery"),value:"Out for delivery"},
+      store: "Proxi",
+      deliveryAddress: "2118 Thornridge Cir. Syracuse, Connecticut 35624",
+      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
+      scheduleDateTime: {jsx:renderScheduleTime("August 22","05:22 AM"),value:"August 22-05:22 AM"},
+      paymentMethod: {jsx:renderPaymentMethod("Cash", '10'),value:"Cash"},
+      createdDate: "2025-02-28",
+    },
+  ]);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [popoverAnchorEl, setPopoverAnchorEl] = useState<HTMLElement | null>(
+    null
+  );
+  const [popoverOrder, setPopoverOrder] = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [modalMode, setModalMode] = useState<
+    "add" | "edit" | "view" | "payment"
+  >("add");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const columns: TableColumns[] = [
+    {
+      field: "orderId",
+      headerName: "Order ID",
+      type: "jsx",
+      sort:true
+    },
+    {
+      field: "amount",
+      headerName: "Amount",
+      type: "text",
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      type: "jsx",
+    },
+    {
+      field: "store",
+      headerName: "Store",
+      type: "text",
+      sort:true
+    },
+    {
+      field: "deliveryAddress",
+      headerName: "Delivery Address",
+      type: "text",
+    },
+    {
+      field: "deliveryMode",
+      headerName: "Delivery Mode",
+      type: "jsx",
+    },
+    {
+      field: "scheduleDateTime",
+      headerName: "Schedule Time",
+      type: "jsx",
+    },
+    {
+      field: "createdDate",
+      headerName: "Created Date",
+      type: "date",
+      // renderCell: (value, row) => (
+      //   <div className="text-[14px] font-inter font-[500] text-cardValue">
+      //     {value}
+      //   </div>
+      // ),
+    },
+    {
+      field: "paymentMethod",
+      headerName: "Payment Method",
+      type: "jsx",
+      // renderCell: (value, row) => renderPaymentMethod(value, row),
+    },
+  ];
+
+  const handleOrderIdClick = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    orderId: string
+  ) => {
+    event.stopPropagation();
+    const foundOrder = orders.find(order => order.id == orderId);
+    if(foundOrder) {
+      const orderWithItems = {
+        ...foundOrder,
+        items: [
+          {
+            name: "Chicken Burger",
+            quantity: 2,
+            price: "₹100.00",
+          },
+          {
+            name: "Chicken Burger",
+            quantity: 2,
+            price: "₹100.00",
+          },
+          {
+            name: "Chicken Burger",
+            quantity: 2,
+            price: "₹100.00",
+          },
+        ],
+      };
+      setPopoverAnchorEl(event.currentTarget);
+      setPopoverOrder(orderWithItems);
+      setPopoverOpen(true);
+    }
+  };
+
+  // Function to render payment method with appropriate styling
+  
+  // Handler for opening the payment modal
+  const handleOpenPaymentModal = (orderId: string) => {
+    const foundOrder = orders.find(order => order.id == orderId);
+    if(foundOrder){
+      setSelectedOrder(foundOrder);
+      setModalMode("payment");
+      setIsModalOpen(true);
+
+    }
+    
+  };
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        popoverOpen &&
+        popoverAnchorEl &&
+        event.target instanceof Node &&
+        !popoverAnchorEl.contains(event.target)
+      ) {
+        setPopoverOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [popoverOpen, popoverAnchorEl]);
+
+  
+  return (
+  <>
+  <TableTemplate tableColumns={columns} tableData={orders} enableDateFilters={true} densityFirst={true} selectedRows={selectedRows} setSelectedRows={setSelectedRows} pageSize={10} searchPlaceholder="Search Order"/>
+  <UnifiedPopover
+        isOpen={popoverOpen}
+        onClose={() => setPopoverOpen(false)}
+        data={popoverOrder}
+        type="order"
+        anchorEl={popoverAnchorEl}
+      />
+  {isModalOpen &&
+        (modalMode === "payment" ? (
+          <CustomModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            mode="payment"
+            onSave={() => null}
+            title={selectedOrder?.orderId || "Order Details"}
+            size="sm"
+            showFooter={true}
+            paymentDetails={preparePaymentDetails()}
+            confirmText="Save"
+          />
+        ) : (
+          <CustomModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            mode={modalMode}
+            onSave={() => null}
+            title={modalMode === "add" ? "Create Order" : "Edit Order"}
+            fields={[]}
+            size="sm"
+            showToggle={false}
+            confirmText={modalMode === "add" ? "Create" : "Save"}
+          />
+        ))}
+
+  </>)
+  
+};
+
+export default Orders;

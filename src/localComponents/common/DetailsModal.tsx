@@ -2,37 +2,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import Burger from "../../assets/images/burger.png"
 import { Order } from "../../types";
-interface Store {
-  id: string;
-  storeId: string;
-  amount: string;
-
-  name: string;
-  address: string;
-  rating: number;
-  status: "Active" | "Inactive";
-  items?: StoreItem[]; // Optional items for detailed view
-}
-
-
-interface StoreItem {
-  name: string;
-  quantity: number;
-  price: string;
-}
-
-interface OrderItem {
-  name: string;
-  quantity: number;
-  price: string;
-}
 
 // Unified Popover Component
 const UnifiedPopover: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-  data: Store | Order | null;
-  type: "store" | "order";
+  data: Order | null;
+  type: "order";
   anchorEl: HTMLElement | null;
 }> = ({ isOpen, onClose, data, type, anchorEl }) => {
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -149,13 +125,13 @@ const UnifiedPopover: React.FC<{
 
   // Render Store Popover Content
   const renderStoreContent = () => {
-    const store = data as Store;
-    const items = store.items || [];
+    const order = data as Order;
+    const items = order.items || [];
  // Calculate total dynamically if items exist
  const calculateTotal = () => {
   if (items.length === 0) {
     // If no items, just use the order amount
-    return store.amount;
+    return order.amount;
   }
   
   // Otherwise calculate from items
@@ -166,7 +142,7 @@ const UnifiedPopover: React.FC<{
   }, 0);
   
   // Format with same currency symbol as in the order amount
-  const currencySymbol = store.amount.match(/[^0-9.]/g)?.[0] || '₹';
+  const currencySymbol = order.amount.match(/[^0-9.]/g)?.[0] || '₹';
   return `${currencySymbol}${(total/2).toFixed(2)}`;
 };
 
@@ -175,7 +151,7 @@ const total = calculateTotal();
       <>
         {/* Store ID Header */}
         <div className="flex justify-between items-center p-3 border-b">
-          <h2 className="text-headding-color text-[12px] font-inter font-[500] mb-3">{store.storeId}</h2>
+          <h2 className="text-headding-color text-[12px] font-inter font-[500] mb-3">{order.storeId}</h2>
           <button
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
@@ -325,23 +301,6 @@ export const OrderPopover: React.FC<{
       onClose={props.onClose}
       data={props.order}
       type="order"
-      anchorEl={props.anchorEl}
-    />
-  );
-};
-
-export const StorePopover: React.FC<{
-  isOpen: boolean;
-  onClose: () => void;
-  store: Store | null;
-  anchorEl: HTMLElement | null;
-}> = (props) => {
-  return (
-    <UnifiedPopover
-      isOpen={props.isOpen}
-      onClose={props.onClose}
-      data={props.store}
-      type="store"
       anchorEl={props.anchorEl}
     />
   );

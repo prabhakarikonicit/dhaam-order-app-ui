@@ -4,6 +4,7 @@ import useMobileView from "./hooks/useMobileView";
 const TableTemplate = ({
   tableColumns,
   tableData,
+  pageSize = 10,
   hideToolbar = false,
   showActionColumn = false,
   enableDateFilters = false,
@@ -13,6 +14,7 @@ const TableTemplate = ({
 }: {
   tableColumns: TableColumns[];
   tableData: TableData[];
+  pageSize?:number;
   hideToolbar?: boolean;
   showActionColumn?: boolean;
   enableDateFilters?: boolean;
@@ -21,7 +23,8 @@ const TableTemplate = ({
   setSelectedRows?: React.Dispatch<React.SetStateAction<string[]>> | null;
 }) => {
   const [filteredData, setFilteredData] = useState<TableData[]>([]);
-
+  const [currentPageSize, setCurrentPageSize] = useState(pageSize);
+  const [currentPage, setCurrentPage] = useState(1);
   const [modalMode, setModalMode] = useState<
     "add" | "edit" | "view" | "payment"
   >("add");
@@ -191,6 +194,78 @@ const TableTemplate = ({
   //     setEndDate("");
   //   }
   // };
+
+  // Desktop pagination
+  const renderPagination = () => {
+    return (
+      <div className="p-4 flex justify-between items-center border-t border-gray-200">
+        <span className="text-[14px] font-inter font-[500] text-headding-color">
+          Showing result {Math.min(currentPageSize, filteredData.length)} out of{" "}
+          {tableData.length}
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            className="p-2 hover:bg-gray-100 rounded"
+            disabled={currentPage === 1}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M12.7071 5.29289C13.0976 5.68342 13.0976 6.31658 12.7071 6.70711L9.41421 10L12.7071 13.2929C13.0976 13.6834 13.0976 14.3166 12.7071 14.7071C12.3166 15.0976 11.6834 15.0976 11.2929 14.7071L7.29289 10.7071C6.90237 10.3166 6.90237 9.68342 7.29289 9.29289L11.2929 5.29289C11.6834 4.90237 12.3166 4.90237 12.7071 5.29289Z"
+                fill="#4A4A4A"
+              />
+            </svg>
+          </button>
+          <button
+            onClick={() => setCurrentPage((prev) => prev + 1)}
+            className="p-2 hover:bg-gray-100 rounded"
+            disabled={currentPage * currentPageSize >= filteredData.length}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M7.29289 14.7071C6.90237 14.3166 6.90237 13.6834 7.29289 13.2929L10.5858 10L7.29289 6.70711C6.90237 6.31658 6.90237 5.68342 7.29289 5.29289C7.68342 4.90237 8.31658 4.90237 8.70711 5.29289L12.7071 9.29289C13.0976 9.68342 13.0976 10.3166 12.7071 10.7071L8.70711 14.7071C8.31658 15.0976 7.68342 15.0976 7.29289 14.7071Z"
+                fill="#4A4A4A"
+              />
+            </svg>
+          </button>
+          <select
+            className="ml-2 px-4 py-4 border border-gray-200 rounded-custom text-[12px] bg-reloadBackground"
+            value={currentPageSize}
+            onChange={(e) => {
+              setCurrentPageSize(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+          >
+            <option value={10} className="text-[12px] bg-reloadBackground">
+              10
+            </option>
+            <option value={20} className="text-[12px] bg-reloadBackground">
+              20
+            </option>
+            <option value={50} className="text-[12px] bg-reloadBackground">
+              50
+            </option>
+          </select>
+        </div>
+      </div>
+    );
+  };
 
   const handleFilterValueChange = (value: string) => {
     if (appliedFilter && Object.keys(appliedFilter).length > 0) {
@@ -716,7 +791,10 @@ const TableTemplate = ({
             </tr>
           </thead>
           <tbody>
-            {filteredData.map((row) => (
+            {filteredData.slice(
+                  (currentPage - 1) * currentPageSize,
+                  currentPage * currentPageSize
+                ).map((row) => (
               <tr
                 key={row.id}
                 className="border-b border-gray-200 bg-store-card"
@@ -747,6 +825,8 @@ const TableTemplate = ({
             ))}
           </tbody>
         </table>
+        {/* Desktop pagination */}
+        {renderPagination()}
       </div>
       {/* <CustomDataGrid
         rows={paginatedData}

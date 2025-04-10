@@ -22,6 +22,8 @@ const TableTemplate = ({
   selectedRows?: string[] | null,
   setSelectedRows?: React.Dispatch<React.SetStateAction<string[]>> | null;
 }) => {
+
+  const [hasJSXTypeError, setHasJSXTypeError] = useState(false);
   const [filteredData, setFilteredData] = useState<TableData[]>([]);
   const [currentPageSize, setCurrentPageSize] = useState(pageSize);
   const [currentPage, setCurrentPage] = useState(1);
@@ -58,8 +60,19 @@ const TableTemplate = ({
 
   // Sample data initialization with createdDate field
   useEffect(() => {
-    // Filter by date range initially
-    // const filtered = filterByDateRange(mockOrders, startDate, endDate);
+    // table data validation, render error component if data is invalid type
+    tableColumns.forEach(col => {
+      if(col.type == 'jsx') {
+        const isValid = tableData.every(row => {
+          const keys = Object.keys(row[col.field]);
+          return typeof(row[col.field]) == 'object' && keys.length == 2 && keys[0] == 'jsx' && typeof(row[col.field][keys[0]]) == 'object' && keys[1] == 'value' && typeof(row[col.field][keys[1]]) == 'string';
+      })
+      if(!isValid) {
+        setHasJSXTypeError(true);
+        return;
+      }
+      }
+    })
     setFilteredData(tableData);
 
     // Initialize visible columns
@@ -522,7 +535,9 @@ const TableTemplate = ({
     document.body.removeChild(link);
   };
   return (
-    <div className="px-8 pb-8 overflow-x-auto">
+    <>
+    {hasJSXTypeError && <div>JSX Column Has Invalid Cell Data Type!!</div>}
+    {!hasJSXTypeError && <div className="px-8 pb-8 overflow-x-auto">
       <div className="w-full border border-grey-border rounded-custom8px mb-10">
         {!hideToolbar && (
           <div className="p-4 border-b border-gray-200 flex justify-between items-center">
@@ -872,7 +887,8 @@ const TableTemplate = ({
           },
         }}
       /> */}
-    </div>
+    </div>}</>
+  
   );
 };
 

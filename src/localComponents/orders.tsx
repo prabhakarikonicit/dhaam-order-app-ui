@@ -441,7 +441,7 @@ const [selectedRows, setSelectedRows] = useState<string[]>([])
   };
   return (
   <>
-  <TableTemplate tableColumns={columns} tableData={orders} enableDateFilters={true} densityFirst={true} selectedRows={selectedRows} setSelectedRows={setSelectedRows} pageSize={10}/>
+  <TableTemplate tableColumns={columns} tableData={orders} enableDateFilters={true} densityFirst={true} selectedRows={selectedRows} setSelectedRows={setSelectedRows} pageSize={10} searchPlaceholder="Search Order"/>
   {isModalOpen &&
         (modalMode === "payment" ? (
           <CustomModal

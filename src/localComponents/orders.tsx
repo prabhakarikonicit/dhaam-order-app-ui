@@ -911,7 +911,7 @@ const Orders = () => {
             onClose={() => setIsModalOpen(false)}
             mode="payment"
             onSave={() => null}
-            title={selectedOrder?.orderId || "Order Details"}
+            title={selectedOrder?.orderId.value || "Order Details"}
             size="sm"
             showFooter={true}
             paymentDetails={preparePaymentDetails()}

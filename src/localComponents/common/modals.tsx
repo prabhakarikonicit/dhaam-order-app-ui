@@ -1,5 +1,5 @@
 import React, { useState, useEffect, ReactNode } from "react";
-import {FieldDefinition, BaseItem} from '../../types'
+import {FieldDefinition, BaseItem, JSXTableCell} from '../../types'
 
 
 const EyeIcon = () => (
@@ -48,8 +48,8 @@ export interface CustomModalProps<T extends BaseItem> {
     disabled?: boolean;
   };
   paymentDetails?: {
-    orderId: string;
-    paymentMethod: string;
+    orderId: JSXTableCell;
+    paymentMethod: JSXTableCell;
     items: {
       name: string;
       quantity: number;

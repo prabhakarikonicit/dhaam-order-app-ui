@@ -3,10 +3,17 @@ import TableTemplate from "./common/tableTemplate";
 import CustomModal from "./common/modals";
 import UnifiedPopover from "./common/DetailsModal";
 import { Order, TableColumns } from "../types";
+import StatCard from "./common/statCard";
+import newOrderIcon from "../assets/images/newOrderIcon.svg";
+import allOrdersIcon from "../assets/images/allOrdersIcon.svg";
+import pendingIcon from "../assets/images/pendingIcon.svg";
+import dispatchedIcon from "../assets/images/dispatchedIcon.svg";
+import completedIcon from "../assets/images/completedIcon.svg";
+import cancelledIcon from "../assets/images/cancelledIcon.svg";
 const Orders = () => {
-const [selectedRows, setSelectedRows] = useState<string[]>([])
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
   // Function to render status with appropriate styling
-  const renderStatus = (value:string) => {
+  const renderStatus = (value: string) => {
     // Status styles for status badges
     const statusStyles: {
       [key: string]: {
@@ -34,7 +41,7 @@ const [selectedRows, setSelectedRows] = useState<string[]>([])
 
     // Reject icon (red X)
     const rejectIcon = (
-      <div className="flex justify-center items-center w-8 h-8 rounded-custom border border-borderCrossIcon bg-bgCrossIcon"> 
+      <div className="flex justify-center items-center w-8 h-8 rounded-custom border border-borderCrossIcon bg-bgCrossIcon">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="15"
@@ -120,7 +127,6 @@ const [selectedRows, setSelectedRows] = useState<string[]>([])
         "bg-blueCredit rounded-custom4x text-primaryCredit font-inter font-[600]";
       widthClass = "w-32";
     }
-  
 
     return (
       <div
@@ -136,64 +142,73 @@ const [selectedRows, setSelectedRows] = useState<string[]>([])
     );
   };
 
-  const renderOrderId = (value:string, orderId:string) => {
-    return (<div className="flex items-center text-cardValue font-inter font-[500] text-[12px]">
-    {value}
-    <button className="ml-2" onClick={(e) => handleOrderIdClick(e, orderId)}>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 16 16"
-        fill="none"
-      >
-        <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M4.23431 5.83432C4.54673 5.5219 5.05327 5.5219 5.36569 5.83432L8 8.46864L10.6343 5.83432C10.9467 5.5219 11.4533 5.5219 11.7657 5.83432C12.0781 6.14674 12.0781 6.65327 11.7657 6.96569L8.56569 10.1657C8.25327 10.4781 7.74673 10.4781 7.43431 10.1657L4.23431 6.96569C3.9219 6.65327 3.9219 6.14674 4.23431 5.83432Z"
-          fill="#2B2B2B"
-        />
-      </svg>
-    </button>
-  </div>)
-  }
-
-  const renderDeliveryMode = (value:string) => {
-    return (<div>
-      <div className="text-[12px] font-inter font-[600] text-headding-color whitespace-nowrap overflow-hidden text-ellipsis bg-subMenus p-1 rounded-custom80px text-center">
+  const renderOrderId = (value: string, orderId: string) => {
+    return (
+      <div className="flex items-center text-cardValue font-inter font-[500] text-[12px]">
         {value}
-      </div>
-    </div>)
-  }
-
-  const renderScheduleTime = (date:string, time:string) => {
-    return ( <div className="flex items-center justify-between w-[96px]  pr-1 mr-3">
-      <div>
-        <div className="text-[14px] font-inter  w-[80px]  font-[500] text-cardValue leading-[21px] mr-4">
-          {date}
-        </div>
-        <div className="text-[11px] font-[400] font-inter text-cardTitle">
-          {time}
-        </div>
-      </div>
-      <div className="text-gray-500 ps-0 md:p-0 sm:p-0 lg:p-0 xl:p-0">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="17"
-          height="16"
-          viewBox="0 0 17 16"
-          fill="none"
+        <button
+          className="ml-2"
+          onClick={(e) => handleOrderIdClick(e, orderId)}
         >
-          <path
-            fill-rule="evenodd"
-            clip-rule="evenodd"
-            d="M4.37689 5.83441C4.68931 5.52199 5.19584 5.52199 5.50826 5.83441L8.14258 8.46873L10.7769 5.83441C11.0893 5.52199 11.5958 5.52199 11.9083 5.83441C12.2207 6.14683 12.2207 6.65336 11.9083 6.96578L8.70826 10.1658C8.39584 10.4782 7.88931 10.4782 7.57689 10.1658L4.37689 6.96578C4.06447 6.65336 4.06447 6.14683 4.37689 5.83441Z"
-            fill="#2B2B2B"
-          />
-        </svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+          >
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              d="M4.23431 5.83432C4.54673 5.5219 5.05327 5.5219 5.36569 5.83432L8 8.46864L10.6343 5.83432C10.9467 5.5219 11.4533 5.5219 11.7657 5.83432C12.0781 6.14674 12.0781 6.65327 11.7657 6.96569L8.56569 10.1657C8.25327 10.4781 7.74673 10.4781 7.43431 10.1657L4.23431 6.96569C3.9219 6.65327 3.9219 6.14674 4.23431 5.83432Z"
+              fill="#2B2B2B"
+            />
+          </svg>
+        </button>
       </div>
-    </div>)
-  }
+    );
+  };
+
+  const renderDeliveryMode = (value: string) => {
+    return (
+      <div>
+        <div className="text-[12px] font-inter font-[600] text-headding-color whitespace-nowrap overflow-hidden text-ellipsis bg-subMenus p-1 rounded-custom80px text-center">
+          {value}
+        </div>
+      </div>
+    );
+  };
+
+  const renderScheduleTime = (date: string, time: string) => {
+    return (
+      <div className="flex items-center justify-between w-[96px]  pr-1 mr-3">
+        <div>
+          <div className="text-[14px] font-inter  w-[80px]  font-[500] text-cardValue leading-[21px] mr-4">
+            {date}
+          </div>
+          <div className="text-[11px] font-[400] font-inter text-cardTitle">
+            {time}
+          </div>
+        </div>
+        <div className="text-gray-500 ps-0 md:p-0 sm:p-0 lg:p-0 xl:p-0">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="17"
+            height="16"
+            viewBox="0 0 17 16"
+            fill="none"
+          >
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M4.37689 5.83441C4.68931 5.52199 5.19584 5.52199 5.50826 5.83441L8.14258 8.46873L10.7769 5.83441C11.0893 5.52199 11.5958 5.52199 11.9083 5.83441C12.2207 6.14683 12.2207 6.65336 11.9083 6.96578L8.70826 10.1658C8.39584 10.4782 7.88931 10.4782 7.57689 10.1658L4.37689 6.96578C4.06447 6.65336 4.06447 6.14683 4.37689 5.83441Z"
+              fill="#2B2B2B"
+            />
+          </svg>
+        </div>
+      </div>
+    );
+  };
 
   const preparePaymentDetails = () => {
     if (!selectedOrder) return undefined;
@@ -229,123 +244,195 @@ const [selectedRows, setSelectedRows] = useState<string[]>([])
   };
   const [orders, setOrders] = useState<Order[]>([
     {
-      id: '1',
-      orderId: {jsx:renderOrderId("#20345", '1'),value:"#20345"},
+      id: "1",
+      orderId: { jsx: renderOrderId("#20345", "1"), value: "#20345" },
       amount: "₹100.00",
-      status: {jsx:renderStatus(""),value:"New"},
+      status: { jsx: renderStatus(""), value: "New" },
       store: "Queenstown Public House",
       deliveryAddress: "6391 Elgin St. Celina, Delaware 10299",
-      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
-      scheduleDateTime: {jsx:renderScheduleTime("January 26","06:30 PM"),value:"January 26-06:30 PM"},
-      paymentMethod: {jsx:renderPaymentMethod("Cash", '1'),value:"Cash"},
+      deliveryMode: {
+        jsx: renderDeliveryMode("Home delivery"),
+        value: "Home delivery",
+      },
+      scheduleDateTime: {
+        jsx: renderScheduleTime("January 26", "06:30 PM"),
+        value: "January 26-06:30 PM",
+      },
+      paymentMethod: { jsx: renderPaymentMethod("Cash", "1"), value: "Cash" },
       createdDate: "2025-02-12",
     },
     {
-      id: '2',
-      orderId: {jsx:renderOrderId("#20346", '2'),value:"#20346"},
+      id: "2",
+      orderId: { jsx: renderOrderId("#20346", "2"), value: "#20346" },
       amount: "₹200.00",
-      status: {jsx:renderStatus("Pending"), value:"Pending"},
+      status: { jsx: renderStatus("Pending"), value: "Pending" },
       store: "Plumed Horse",
       deliveryAddress: "8502 Preston Rd. Inglewood, Maine 98380",
-      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
-      scheduleDateTime: {jsx:renderScheduleTime("January 27","07:30 PM"),value:"January 27-07:30 PM"},
-      paymentMethod: {jsx:renderPaymentMethod("UPI", '2'),value:"UPI"},
+      deliveryMode: {
+        jsx: renderDeliveryMode("Home delivery"),
+        value: "Home delivery",
+      },
+      scheduleDateTime: {
+        jsx: renderScheduleTime("January 27", "07:30 PM"),
+        value: "January 27-07:30 PM",
+      },
+      paymentMethod: { jsx: renderPaymentMethod("UPI", "2"), value: "UPI" },
       createdDate: "2025-02-15",
     },
     {
       id: "3",
-      orderId: {jsx:renderOrderId("#20347", '3'),value:"#20347"},
+      orderId: { jsx: renderOrderId("#20347", "3"), value: "#20347" },
       amount: "₹300.00",
-      status: {jsx:renderStatus(""),value:"New"},
+      status: { jsx: renderStatus(""), value: "New" },
       store: "King Lee's",
       deliveryAddress: "3517 W. Gray St. Utica, Pennsylvania 57867",
-      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
-      scheduleDateTime: {jsx:renderScheduleTime("May 27","12:30 PM"),value:"May 27-12:30 PM"},
-      paymentMethod: {jsx:renderPaymentMethod("Credit Card", '3'),value:"Credit Card"},
+      deliveryMode: {
+        jsx: renderDeliveryMode("Home delivery"),
+        value: "Home delivery",
+      },
+      scheduleDateTime: {
+        jsx: renderScheduleTime("May 27", "12:30 PM"),
+        value: "May 27-12:30 PM",
+      },
+      paymentMethod: {
+        jsx: renderPaymentMethod("Credit Card", "3"),
+        value: "Credit Card",
+      },
       createdDate: "2025-02-18",
     },
     {
       id: "4",
-      orderId: {jsx:renderOrderId("#20348", '4'),value:"#20348"},
+      orderId: { jsx: renderOrderId("#20348", "4"), value: "#20348" },
       amount: "₹400.00",
-      status: {jsx:renderStatus(""),value:"New"},
+      status: { jsx: renderStatus(""), value: "New" },
       store: "Marina Kitchen",
       deliveryAddress: "4140 Parker Rd. Allentown, New Mexico 31134",
-      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
-      scheduleDateTime: {jsx:renderScheduleTime("March 17","03:10 AM"),value:"March 17-03:10 AM"},
-      paymentMethod: {jsx:renderPaymentMethod("Cash", '4'),value:"Cash"},
+      deliveryMode: {
+        jsx: renderDeliveryMode("Home delivery"),
+        value: "Home delivery",
+      },
+      scheduleDateTime: {
+        jsx: renderScheduleTime("March 17", "03:10 AM"),
+        value: "March 17-03:10 AM",
+      },
+      paymentMethod: { jsx: renderPaymentMethod("Cash", "4"), value: "Cash" },
       createdDate: "2025-02-20",
     },
     {
       id: "5",
-      orderId: {jsx:renderOrderId("#20349", '5'),value:"#20349"},
+      orderId: { jsx: renderOrderId("#20349", "5"), value: "#20349" },
       amount: "₹500.00",
-      status: {jsx:renderStatus(""),value:"New"},
+      status: { jsx: renderStatus(""), value: "New" },
       store: "The Aviary",
       deliveryAddress: "4517 Washington Ave. Manchester, Kentucky 39495",
-      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
-      scheduleDateTime: {jsx:renderScheduleTime("April 17","03:10 AM"),value:"April 17-03:10 AM"},
-      paymentMethod: {jsx:renderPaymentMethod("UPI", '5'),value:"UPI"},
+      deliveryMode: {
+        jsx: renderDeliveryMode("Home delivery"),
+        value: "Home delivery",
+      },
+      scheduleDateTime: {
+        jsx: renderScheduleTime("April 17", "03:10 AM"),
+        value: "April 17-03:10 AM",
+      },
+      paymentMethod: { jsx: renderPaymentMethod("UPI", "5"), value: "UPI" },
       createdDate: "2025-02-22",
     },
     {
       id: "6",
-      orderId: {jsx:renderOrderId("#20350", '6'),value:"#20350"},
+      orderId: { jsx: renderOrderId("#20350", "6"), value: "#20350" },
       amount: "₹600.00",
-      status: {jsx:renderStatus(""),value:"New"},
+      status: { jsx: renderStatus(""), value: "New" },
       store: "Crab Hut",
       deliveryAddress: "2715 Ash Dr. San Jose, South Dakota 83475",
-      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
-      scheduleDateTime: {jsx:renderScheduleTime("April 17","03:10 AM"),value:"April 17-03:10 AM"},
-      paymentMethod: {jsx:renderPaymentMethod("Credit Card", '6'),value:"Credit Card"},
+      deliveryMode: {
+        jsx: renderDeliveryMode("Home delivery"),
+        value: "Home delivery",
+      },
+      scheduleDateTime: {
+        jsx: renderScheduleTime("April 17", "03:10 AM"),
+        value: "April 17-03:10 AM",
+      },
+      paymentMethod: {
+        jsx: renderPaymentMethod("Credit Card", "6"),
+        value: "Credit Card",
+      },
       createdDate: "2025-02-24",
     },
     {
       id: "7",
-      orderId: {jsx:renderOrderId("#20351", '7'),value:"#20351"},
+      orderId: { jsx: renderOrderId("#20351", "7"), value: "#20351" },
       amount: "₹700.00",
-      status: {jsx:renderStatus(""),value:"New"},
+      status: { jsx: renderStatus(""), value: "New" },
       store: "Brass Tacks",
       deliveryAddress: "2972 Westheimer Rd. Santa Ana, Illinois 85486",
-      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
-      scheduleDateTime: {jsx:renderScheduleTime("August 22","05:22 AM"),value:"August 22-05:22 AM"},
-      paymentMethod: {jsx:renderPaymentMethod("Cash", '7'), value:"Cash"},
+      deliveryMode: {
+        jsx: renderDeliveryMode("Home delivery"),
+        value: "Home delivery",
+      },
+      scheduleDateTime: {
+        jsx: renderScheduleTime("August 22", "05:22 AM"),
+        value: "August 22-05:22 AM",
+      },
+      paymentMethod: { jsx: renderPaymentMethod("Cash", "7"), value: "Cash" },
       createdDate: "2025-02-25",
     },
     {
       id: "8",
-      orderId: {jsx:renderOrderId("#20352", '8'),value:"#20352"},
+      orderId: { jsx: renderOrderId("#20352", "8"), value: "#20352" },
       amount: "₹800.00",
-      status: {jsx:renderStatus("Completed"),value:"Completed"},
+      status: { jsx: renderStatus("Completed"), value: "Completed" },
       store: "Bean Around the World Coffees",
       deliveryAddress: "2715 Ash Dr. San Jose, South Dakota 83475",
-      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
-      scheduleDateTime: {jsx:renderScheduleTime("August 22","05:22 AM"),value:"August 22-05:22 AM"},
-      paymentMethod: {jsx:renderPaymentMethod("UPI", '8'),value:"UPI"},
+      deliveryMode: {
+        jsx: renderDeliveryMode("Home delivery"),
+        value: "Home delivery",
+      },
+      scheduleDateTime: {
+        jsx: renderScheduleTime("August 22", "05:22 AM"),
+        value: "August 22-05:22 AM",
+      },
+      paymentMethod: { jsx: renderPaymentMethod("UPI", "8"), value: "UPI" },
       createdDate: "2025-02-26",
     },
     {
       id: "9",
-      orderId: {jsx:renderOrderId("#20353", '9'),value:"#20353"},
+      orderId: { jsx: renderOrderId("#20353", "9"), value: "#20353" },
       amount: "₹900.00",
-      status: {jsx:renderStatus("Cancelled"),value:"Cancelled"},
+      status: { jsx: renderStatus("Cancelled"), value: "Cancelled" },
       store: "Chewy Balls",
       deliveryAddress: "1901 Thornridge Cir. Shiloh, Hawaii 81063",
-      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
-      scheduleDateTime: {jsx:renderScheduleTime("August 22","05:22 AM"),value:"August 22-05:22 AM"},
-      paymentMethod: {jsx:renderPaymentMethod("Credit Card", '9'),value:"Credit Card"},
+      deliveryMode: {
+        jsx: renderDeliveryMode("Home delivery"),
+        value: "Home delivery",
+      },
+      scheduleDateTime: {
+        jsx: renderScheduleTime("August 22", "05:22 AM"),
+        value: "August 22-05:22 AM",
+      },
+      paymentMethod: {
+        jsx: renderPaymentMethod("Credit Card", "9"),
+        value: "Credit Card",
+      },
       createdDate: "2025-02-27",
     },
     {
       id: "10",
-      orderId: {jsx:renderOrderId("#20354", '10'),value:"#20354"},
+      orderId: { jsx: renderOrderId("#20354", "10"), value: "#20354" },
       amount: "₹1000.00",
-      status: {jsx:renderStatus("Out for delivery"),value:"Out for delivery"},
+      status: {
+        jsx: renderStatus("Out for delivery"),
+        value: "Out for delivery",
+      },
       store: "Proxi",
       deliveryAddress: "2118 Thornridge Cir. Syracuse, Connecticut 35624",
-      deliveryMode: {jsx:renderDeliveryMode("Home delivery"),value:"Home delivery"},
-      scheduleDateTime: {jsx:renderScheduleTime("August 22","05:22 AM"),value:"August 22-05:22 AM"},
-      paymentMethod: {jsx:renderPaymentMethod("Cash", '10'),value:"Cash"},
+      deliveryMode: {
+        jsx: renderDeliveryMode("Home delivery"),
+        value: "Home delivery",
+      },
+      scheduleDateTime: {
+        jsx: renderScheduleTime("August 22", "05:22 AM"),
+        value: "August 22-05:22 AM",
+      },
+      paymentMethod: { jsx: renderPaymentMethod("Cash", "10"), value: "Cash" },
       createdDate: "2025-02-28",
     },
   ]);
@@ -364,7 +451,7 @@ const [selectedRows, setSelectedRows] = useState<string[]>([])
       field: "orderId",
       headerName: "Order ID",
       type: "jsx",
-      sort:true
+      sort: true,
     },
     {
       field: "amount",
@@ -380,7 +467,7 @@ const [selectedRows, setSelectedRows] = useState<string[]>([])
       field: "store",
       headerName: "Store",
       type: "text",
-      sort:true
+      sort: true,
     },
     {
       field: "deliveryAddress",
@@ -420,8 +507,8 @@ const [selectedRows, setSelectedRows] = useState<string[]>([])
     orderId: string
   ) => {
     event.stopPropagation();
-    const foundOrder = orders.find(order => order.id == orderId);
-    if(foundOrder) {
+    const foundOrder = orders.find((order) => order.id == orderId);
+    if (foundOrder) {
       const orderWithItems = {
         ...foundOrder,
         items: [
@@ -449,17 +536,15 @@ const [selectedRows, setSelectedRows] = useState<string[]>([])
   };
 
   // Function to render payment method with appropriate styling
-  
+
   // Handler for opening the payment modal
   const handleOpenPaymentModal = (orderId: string) => {
-    const foundOrder = orders.find(order => order.id == orderId);
-    if(foundOrder){
+    const foundOrder = orders.find((order) => order.id == orderId);
+    if (foundOrder) {
       setSelectedOrder(foundOrder);
       setModalMode("payment");
       setIsModalOpen(true);
-
     }
-    
   };
 
   useEffect(() => {
@@ -480,18 +565,64 @@ const [selectedRows, setSelectedRows] = useState<string[]>([])
     };
   }, [popoverOpen, popoverAnchorEl]);
 
-  
   return (
-  <>
-  <TableTemplate tableColumns={columns} tableData={orders} enableDateFilters={true} densityFirst={true} selectedRows={selectedRows} setSelectedRows={setSelectedRows} pageSize={10} searchPlaceholder="Search Order"/>
-  <UnifiedPopover
+    <>
+      <div className="grid grid-cols-2 md:grid-cols-6 sm:grid-cols-6 lg:grid-cols-6 xl:grid-cols-6 gap-2  bg-backgroundWhite mx-8 p-4  rounded-custom8px">
+        <StatCard
+          value="213"
+          description="New Orders"
+          descriptionFirst={true}
+          icon={newOrderIcon}
+        />
+        <StatCard
+          value="245"
+          description="All Orders"
+          descriptionFirst={true}
+          icon={allOrdersIcon}
+        />
+        <StatCard
+          value="111"
+          description="Pending"
+          descriptionFirst={true}
+          icon={pendingIcon}
+        />
+        <StatCard
+          value="164"
+          description="Dispatched"
+          descriptionFirst={true}
+          icon={dispatchedIcon}
+        />
+        <StatCard
+          value="255"
+          description="Completed"
+          descriptionFirst={true}
+          icon={completedIcon}
+        />
+        <StatCard
+          value="25"
+          description="Cancelled"
+          descriptionFirst={true}
+          icon={cancelledIcon}
+        />
+      </div>
+      <TableTemplate
+        tableColumns={columns}
+        tableData={orders}
+        enableDateFilters={true}
+        densityFirst={true}
+        selectedRows={selectedRows}
+        setSelectedRows={setSelectedRows}
+        pageSize={10}
+        searchPlaceholder="Search Order"
+      />
+      <UnifiedPopover
         isOpen={popoverOpen}
         onClose={() => setPopoverOpen(false)}
         data={popoverOrder}
         type="order"
         anchorEl={popoverAnchorEl}
       />
-  {isModalOpen &&
+      {isModalOpen &&
         (modalMode === "payment" ? (
           <CustomModal
             isOpen={isModalOpen}
@@ -517,9 +648,8 @@ const [selectedRows, setSelectedRows] = useState<string[]>([])
             confirmText={modalMode === "add" ? "Create" : "Save"}
           />
         ))}
-
-  </>)
-  
+    </>
+  );
 };
 
 export default Orders;

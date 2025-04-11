@@ -4,6 +4,15 @@ export interface JSXTableCell {
   jsx:JSX.Element;
   value:string;
 }
+
+export interface StatCardProps {
+  value: string;
+  description: string | React.ReactNode;
+  descriptionFirst?: boolean;
+  icon?: string;
+  fontWeight?: string;
+}
+
 export interface Order extends TableData{
     orderId: JSXTableCell;
     amount: string;

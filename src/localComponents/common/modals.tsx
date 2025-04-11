@@ -1,54 +1,6 @@
 import React, { useState, useEffect, ReactNode } from "react";
+import {FieldDefinition, BaseItem, JSXTableCell} from '../../types'
 
-// Define field types for form fields
-export type FieldType =
-  | "text"
-  | "number"
-  | "email"
-  | "password"
-  | "select"
-  | "textarea"
-  | "checkbox"
-  | "date"
-  | "time"
-  | "radio"
-  | "file"
-  | "image-upload"
-  | "custom";
-
-// Field definition interface
-export interface FieldDefinition {
-  id: string;
-  label: string;
-  type: FieldType;
-  placeholder?: string;
-  options?: { value: string; label: string }[];
-  required?: boolean;
-  helperText?: string;
-  disabled?: boolean;
-  min?: number;
-  max?: number;
-  pattern?: string;
-  rows?: number; // For textarea
-  cols?: number; // For textarea
-  customRender?: (props: {
-    value: any;
-    onChange: (value: any) => void;
-    disabled?: boolean;
-    error?: string;
-  }) => ReactNode;
-  fullWidth?: boolean; // Add this to allow fields to take full width
-  containerClassName?: string; // Custom class for the field container
-  inputClassName?: string; // Custom class for the input element
-  layout?: "horizontal" | "vertical"; // Field layout - default is vertical
-}
-
-// Base item interface that can be extended for specific use cases
-export interface BaseItem {
-  id?: string;
-  isActive?: boolean;
-  [key: string]: any;
-}
 
 const EyeIcon = () => (
   <svg
@@ -96,8 +48,8 @@ export interface CustomModalProps<T extends BaseItem> {
     disabled?: boolean;
   };
   paymentDetails?: {
-    orderId: string;
-    paymentMethod: string;
+    orderId: JSXTableCell;
+    paymentMethod: JSXTableCell;
     items: {
       name: string;
       quantity: number;

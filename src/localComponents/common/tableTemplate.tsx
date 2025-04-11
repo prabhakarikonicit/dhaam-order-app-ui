@@ -111,7 +111,7 @@ const TableTemplate = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [tableData]);
 
   useEffect(() => {
     if (appliedFilterType && appliedFilterType == "date") {
@@ -572,7 +572,7 @@ const TableTemplate = ({
     <>
     {hasJSXTypeError && <div>JSX Column Has Invalid Cell Data Type!!</div>}
     {!hasJSXTypeError && <div className="px-8 pb-8 overflow-x-auto">
-      <div className="w-full border border-grey-border rounded-custom8px mb-10">
+      <div className="w-full border border-grey-border bg-backgroundWhite rounded-custom8px mb-10">
         {!hideToolbar && (
           <div className="p-4 border-b border-gray-200 flex justify-between items-center">
             <div className="flex items-center gap-4">

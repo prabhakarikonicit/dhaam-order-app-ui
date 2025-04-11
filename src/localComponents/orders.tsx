@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { ChevronDown, Plus, X } from "lucide-react";
 import TableTemplate from "./common/tableTemplate";
 import CustomModal from "./common/modals";
 import UnifiedPopover from "./common/DetailsModal";
-import { Order, TableColumns } from "../types";
+import { FieldDefinition, Order, TableColumns } from "../types";
 import StatCard from "./common/statCard";
 import newOrderIcon from "../assets/images/newOrderIcon.svg";
 import allOrdersIcon from "../assets/images/allOrdersIcon.svg";
@@ -12,6 +13,10 @@ import completedIcon from "../assets/images/completedIcon.svg";
 import cancelledIcon from "../assets/images/cancelledIcon.svg";
 const Orders = () => {
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const storesDropdownRef = useRef<HTMLDivElement>(null);
+  const [storesDropdownOpen, setStoresDropdownOpen] = useState(false);
+  const actionsDropdownRef = useRef<HTMLDivElement>(null);
+  const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
   // Function to render status with appropriate styling
   const renderStatus = (value: string) => {
     // Status styles for status badges
@@ -436,6 +441,75 @@ const Orders = () => {
       createdDate: "2025-02-28",
     },
   ]);
+
+  // Modal field definitions
+  const modalFields: FieldDefinition[] = [
+    {
+      id: "store",
+      label: "Store",
+      type: "select",
+      options: [
+        { value: "Queenstown Public House", label: "Queenstown Public House" },
+        { value: "Plumed Horse", label: "Plumed Horse" },
+        { value: "King Lee's", label: "King Lee's" },
+      ],
+      required: true,
+    },
+    { id: "amount", label: "Amount", type: "text", required: true },
+    {
+      id: "deliveryAddress",
+      label: "Delivery Address",
+      type: "text",
+      required: true,
+    },
+    {
+      id: "deliveryMode",
+      label: "Delivery Mode",
+      type: "select",
+      options: [
+        { value: "Home delivery", label: "Home delivery" },
+        { value: "Pickup", label: "Pickup" },
+      ],
+      required: true,
+    },
+    {
+      id: "scheduleDate",
+      label: "Schedule Date",
+      type: "date",
+      required: true,
+    },
+    {
+      id: "scheduleTime",
+      label: "Schedule Time",
+      type: "time",
+      required: true,
+    },
+    {
+      id: "status",
+      label: "Status",
+      type: "select",
+      options: [
+        { value: "Pending", label: "Pending" },
+        { value: "Completed", label: "Completed" },
+        { value: "Dispatched", label: "Dispatched" },
+        { value: "Cancelled", label: "Cancelled" },
+        { value: "Out for delivery", label: "Out for delivery" },
+      ],
+      required: true,
+    },
+    {
+      id: "paymentMethod",
+      label: "Payment Method",
+      type: "select",
+      options: [
+        { value: "Cash", label: "Cash" },
+        { value: "UPI", label: "UPI" },
+        { value: "Credit Card", label: "Credit Card" },
+      ],
+      required: true,
+    },
+    { id: "createdDate", label: "Created Date", type: "date", required: true },
+  ];
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [popoverAnchorEl, setPopoverAnchorEl] = useState<HTMLElement | null>(
     null
@@ -565,8 +639,216 @@ const Orders = () => {
     };
   }, [popoverOpen, popoverAnchorEl]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+
+      if (
+        actionsDropdownRef.current &&
+        !actionsDropdownRef.current.contains(event.target as Node)
+      ) {
+        setActionsDropdownOpen(false);
+      }
+      if (
+        storesDropdownRef.current &&
+        !storesDropdownRef.current.contains(event.target as Node)
+      ) {
+        setStoresDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleCreateOrder = () => {
+    setModalMode("add");
+    setIsModalOpen(true);
+  };
+
+  const handleSave = (data: any) => {
+    if (modalMode === "payment") {
+      // Handle saving changes from the payment modal
+      console.log("Saving payment changes:", data);
+
+      // Here you would update the order status or other details as needed
+      if (selectedOrder) {
+        const updatedOrders = orders.map((order) =>
+          order.id === selectedOrder.id
+            ? { ...order, status: data.status || order.status }
+            : order
+        );
+        setOrders(updatedOrders);
+        // applyAllFilters(); // Reapply filters
+      }
+    } else if (modalMode === "add") {
+      const newOrderID = `#${Math.floor(10000 + Math.random() * 90000)}`;
+      const newId = Math.random().toString(36).substr(2, 9);
+      const newStatus = data.status as
+      | "Pending"
+      | "Completed"
+      | "Dispatched"
+      | "Cancelled"
+      | "Out for delivery";
+      const newPaymentMethod = data.paymentMethod as "Cash" | "UPI" | "Credit Card";
+      const newOrder: Order = {
+        id: newId,
+        orderId: {jsx:renderOrderId(newOrderID, newId), value:newOrderID},
+        amount: `₹${parseFloat(data.amount).toFixed(2)}`,
+        status: {
+          jsx: renderStatus(newStatus),
+          value: newStatus,
+        },
+        store: data.store,
+        deliveryAddress: data.deliveryAddress,
+        deliveryMode: {
+          jsx: renderDeliveryMode(data.deliveryMode),
+          value: data.deliveryMode,
+        },
+        scheduleDateTime: {
+          jsx: renderScheduleTime(data.scheduleDate, data.scheduleTime),
+          value: `${data.scheduleDate}-${data.scheduleTime}`,
+        },
+        paymentMethod: { jsx: renderPaymentMethod(newPaymentMethod, newId), value: newPaymentMethod },
+        createdDate: data.createdDate || new Date().toISOString().split("T")[0],
+      };
+      setOrders((prev) => [...prev, newOrder]);
+      // applyAllFilters(); // Reapply filters after adding new order
+    } else if (modalMode === "edit") {
+      // Handle edit functionality
+      if (selectedOrder) {
+        const updatedOrders = orders.map((order) =>
+          order.id === selectedOrder.id ? { ...order, ...data } : order
+        );
+        setOrders(updatedOrders);
+        // applyAllFilters();
+      }
+    }
+    setIsModalOpen(false);
+  };
+
   return (
-    <>
+    <div className="p-0 max-w-full rounded-lg p-1 md:p-6 lg:p-0 xl:p-0 sm:max-h-full md:max-h-full lg:max-h-full xl:max-h-full max-h-[80vh] overflow-y-auto bg-background-grey">
+      {/* Header with search and buttons */}
+      <div className="flex justify-between items-center mb-6 px-8 pt-8 ">
+        <h1 className="text-[16px] md:text-[20px] lg:text-[20px] sm:text-[20px] xl:text-[20px] font-inter font-[600] text-cardValue">
+          Orders
+        </h1>
+
+        <div className="flex items-center space-x-2">
+          {/* Search field */}
+          <div className="relative mr-2 bg-backgroundWhite border border-reloadBorder p-2 rounded-custom">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <g clip-path="url(#clip0_6819_55)">
+                <path
+                  d="M14.66 15.6599C13.352 16.9694 11.6305 17.7848 9.78879 17.9673C7.94705 18.1497 6.09901 17.688 4.55952 16.6607C3.02004 15.6334 1.88436 14.1042 1.34597 12.3334C0.807587 10.5627 0.899804 8.66009 1.60691 6.94973C2.31402 5.23937 3.59227 3.8271 5.22389 2.95351C6.85551 2.07992 8.73954 1.79908 10.555 2.15882C12.3705 2.51856 14.005 3.49664 15.1802 4.92641C16.3554 6.35618 16.9985 8.14919 17 9.99995H15C15.0012 8.61175 14.521 7.26608 13.6413 6.19224C12.7615 5.1184 11.5366 4.38285 10.1753 4.11091C8.81404 3.83898 7.40056 4.04749 6.17577 4.70092C4.95098 5.35436 3.99066 6.41227 3.45845 7.6944C2.92625 8.97653 2.85509 10.4035 3.25711 11.7322C3.65913 13.061 4.50944 14.2092 5.66315 14.9812C6.81687 15.7532 8.20259 16.1013 9.58419 15.9662C10.9658 15.831 12.2578 15.2209 13.24 14.2399L14.66 15.6599ZM12 9.99995H20L16 13.9999L12 9.99995Z"
+                  fill="#636363"
+                />
+              </g>
+              <defs>
+                <clipPath id="clip0_6819_55">
+                  <rect width="20" height="20" fill="white" />
+                </clipPath>
+              </defs>
+            </svg>
+          </div>
+
+          {/* All stores dropdown */}
+          <div className="relative mr-2" ref={storesDropdownRef}>
+            <button
+              className="bg-backgroundWhite rounded-custom px-4 py-2 flex items-center text-menuSubHeadingColor font-inter text-[10px] md:text-[12px] lg:text-[12px] sm:text-[12px] xl:text-[12px] font-[500] border border-reloadBorder shadow-sm"
+              onClick={() => setStoresDropdownOpen(!storesDropdownOpen)}
+            >
+              All stores
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </button>
+
+            {storesDropdownOpen && (
+              <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-custom border border-reloadBorder w-43 z-10">
+                <div className="py-1">
+                  <a
+                    href="#"
+                    className="block px-4 py-2 text-menuSubHeadingColor font-inter text-[12px] font-[500]"
+                  >
+                    All stores
+                  </a>
+                  <a
+                    href="#"
+                    className="block px-4 py-2  whitespace-nowrap text-menuSubHeadingColor font-inter text-[12px] font-[500]"
+                  >
+                    Public House
+                  </a>
+                  <a
+                    href="#"
+                    className="block px-4 py-2  whitespace-nowrap text-menuSubHeadingColor font-inter text-[12px] font-[500]"
+                  >
+                    Plumed Horse
+                  </a>
+                  <a
+                    href="#"
+                    className="block px-4 py-2 text-menuSubHeadingColor font-inter text-[12px] font-[500]"
+                  >
+                    King Lee's
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* More actions dropdown */}
+          <div className="relative mr-2" ref={actionsDropdownRef}>
+            <button
+              className="bg-backgroundWhite rounded-custom px-4 py-2 flex items-center text-menuSubHeadingColor font-inter text-[10px] md:text-[12px] lg:text-[12px] sm:text-[12px] xl:text-[12px] font-[500] border border-reloadBorder shadow-sm"
+              onClick={() => setActionsDropdownOpen(!actionsDropdownOpen)}
+            >
+              More actions
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </button>
+
+            {actionsDropdownOpen && (
+              <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-custom border border-reloadBorder w-43 z-10">
+                <div className="py-1">
+                  <a
+                    href="#"
+                    className="block px-4 py-2 text-menuSubHeadingColor font-inter text-[12px] font-[500]"
+                  >
+                    Import orders
+                  </a>
+                  <a
+                    href="#"
+                    className="block px-4 py-2 text-menuSubHeadingColor whitespace-nowrap font-inter text-[12px] font-[500]"
+                  >
+                    Create new view
+                  </a>
+                  <a
+                    href="#"
+                    className="block px-4 py-2 text-menuSubHeadingColor font-inter text-[12px] font-[500]"
+                  >
+                    Hide analytics
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Create order button */}
+          <button
+            className="bg-bgButton text-whiteColor font-inter text-[10px] md:text-[12px] lg:text-[12px] sm:text-[12px] xl:text-[12px] font-[600] border border-btnBorder rounded-md px-4 py-2 flex items-center shadow-sm"
+            onClick={handleCreateOrder}
+          >
+            Create order
+            <Plus className="ml-1 h-4 w-4" />
+          </button>
+        </div>
+      </div>
+      {/* Stats cards */}
       <div className="grid grid-cols-2 md:grid-cols-6 sm:grid-cols-6 lg:grid-cols-6 xl:grid-cols-6 gap-2  bg-backgroundWhite mx-8 p-4  rounded-custom8px">
         <StatCard
           value="213"
@@ -640,15 +922,15 @@ const Orders = () => {
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             mode={modalMode}
-            onSave={() => null}
+            onSave={handleSave}
             title={modalMode === "add" ? "Create Order" : "Edit Order"}
-            fields={[]}
+            fields={modalFields}
             size="sm"
             showToggle={false}
             confirmText={modalMode === "add" ? "Create" : "Save"}
           />
         ))}
-    </>
+    </div>
   );
 };
 

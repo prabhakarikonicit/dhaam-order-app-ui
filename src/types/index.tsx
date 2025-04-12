@@ -83,10 +83,24 @@ export interface Order extends TableData{
     store: string;
     deliveryAddress: string;
     deliveryMode: JSXTableCell;
-    scheduleDateTime: JSXTableCell;
+    scheduledDateTime: JSXTableCell;
     paymentMethod: JSXTableCell;
     createdDate?: string; // Added for date filtering
     items?: OrderItem[]; // Optional items for detailed view
+  }
+
+  export interface FetchedOrderType {
+    id:string;
+    orderId:string;
+    amount:string;
+    status:string;
+    store:string;
+    deliveryAddress:string;
+    deliveryMode: string;
+    scheduledDate:string;
+    scheduledTime:string;
+    paymentMethod:string;
+    createdDate:string;
   }
 
   interface OrderItem {

@@ -43,6 +43,19 @@ export interface FieldDefinition {
   layout?: "horizontal" | "vertical"; // Field layout - default is vertical
 }
 
+export interface TableTemplateProps {
+  tableColumns: TableColumns[];
+  tableData: TableData[];
+  pageSize?:number;
+  hideToolbar?: boolean;
+  showActionColumn?: boolean;
+  enableDateFilters?: boolean;
+  densityFirst?: boolean;
+  selectedRows?: string[] | null,
+  setSelectedRows?: React.Dispatch<React.SetStateAction<string[]>> | null;
+  searchPlaceholder?:string,
+}
+
 // Base item interface that can be extended for specific use cases
 export interface BaseItem {
   id?: string;

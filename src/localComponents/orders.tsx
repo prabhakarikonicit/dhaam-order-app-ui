@@ -11,7 +11,9 @@ import pendingIcon from "../assets/images/pendingIcon.svg";
 import dispatchedIcon from "../assets/images/dispatchedIcon.svg";
 import completedIcon from "../assets/images/completedIcon.svg";
 import cancelledIcon from "../assets/images/cancelledIcon.svg";
+import { fetchOrders } from "../api";
 const Orders = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const storesDropdownRef = useRef<HTMLDivElement>(null);
   const [storesDropdownOpen, setStoresDropdownOpen] = useState(false);
@@ -247,201 +249,7 @@ const Orders = () => {
       deliveryAddress: selectedOrder.deliveryAddress,
     };
   };
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: "1",
-      orderId: { jsx: renderOrderId("#20345", "1"), value: "#20345" },
-      amount: "₹100.00",
-      status: { jsx: renderStatus(""), value: "New" },
-      store: "Queenstown Public House",
-      deliveryAddress: "6391 Elgin St. Celina, Delaware 10299",
-      deliveryMode: {
-        jsx: renderDeliveryMode("Home delivery"),
-        value: "Home delivery",
-      },
-      scheduleDateTime: {
-        jsx: renderScheduleTime("January 26", "06:30 PM"),
-        value: "January 26-06:30 PM",
-      },
-      paymentMethod: { jsx: renderPaymentMethod("Cash", "1"), value: "Cash" },
-      createdDate: "2025-02-12",
-    },
-    {
-      id: "2",
-      orderId: { jsx: renderOrderId("#20346", "2"), value: "#20346" },
-      amount: "₹200.00",
-      status: { jsx: renderStatus("Pending"), value: "Pending" },
-      store: "Plumed Horse",
-      deliveryAddress: "8502 Preston Rd. Inglewood, Maine 98380",
-      deliveryMode: {
-        jsx: renderDeliveryMode("Home delivery"),
-        value: "Home delivery",
-      },
-      scheduleDateTime: {
-        jsx: renderScheduleTime("January 27", "07:30 PM"),
-        value: "January 27-07:30 PM",
-      },
-      paymentMethod: { jsx: renderPaymentMethod("UPI", "2"), value: "UPI" },
-      createdDate: "2025-02-15",
-    },
-    {
-      id: "3",
-      orderId: { jsx: renderOrderId("#20347", "3"), value: "#20347" },
-      amount: "₹300.00",
-      status: { jsx: renderStatus(""), value: "New" },
-      store: "King Lee's",
-      deliveryAddress: "3517 W. Gray St. Utica, Pennsylvania 57867",
-      deliveryMode: {
-        jsx: renderDeliveryMode("Home delivery"),
-        value: "Home delivery",
-      },
-      scheduleDateTime: {
-        jsx: renderScheduleTime("May 27", "12:30 PM"),
-        value: "May 27-12:30 PM",
-      },
-      paymentMethod: {
-        jsx: renderPaymentMethod("Credit Card", "3"),
-        value: "Credit Card",
-      },
-      createdDate: "2025-02-18",
-    },
-    {
-      id: "4",
-      orderId: { jsx: renderOrderId("#20348", "4"), value: "#20348" },
-      amount: "₹400.00",
-      status: { jsx: renderStatus(""), value: "New" },
-      store: "Marina Kitchen",
-      deliveryAddress: "4140 Parker Rd. Allentown, New Mexico 31134",
-      deliveryMode: {
-        jsx: renderDeliveryMode("Home delivery"),
-        value: "Home delivery",
-      },
-      scheduleDateTime: {
-        jsx: renderScheduleTime("March 17", "03:10 AM"),
-        value: "March 17-03:10 AM",
-      },
-      paymentMethod: { jsx: renderPaymentMethod("Cash", "4"), value: "Cash" },
-      createdDate: "2025-02-20",
-    },
-    {
-      id: "5",
-      orderId: { jsx: renderOrderId("#20349", "5"), value: "#20349" },
-      amount: "₹500.00",
-      status: { jsx: renderStatus(""), value: "New" },
-      store: "The Aviary",
-      deliveryAddress: "4517 Washington Ave. Manchester, Kentucky 39495",
-      deliveryMode: {
-        jsx: renderDeliveryMode("Home delivery"),
-        value: "Home delivery",
-      },
-      scheduleDateTime: {
-        jsx: renderScheduleTime("April 17", "03:10 AM"),
-        value: "April 17-03:10 AM",
-      },
-      paymentMethod: { jsx: renderPaymentMethod("UPI", "5"), value: "UPI" },
-      createdDate: "2025-02-22",
-    },
-    {
-      id: "6",
-      orderId: { jsx: renderOrderId("#20350", "6"), value: "#20350" },
-      amount: "₹600.00",
-      status: { jsx: renderStatus(""), value: "New" },
-      store: "Crab Hut",
-      deliveryAddress: "2715 Ash Dr. San Jose, South Dakota 83475",
-      deliveryMode: {
-        jsx: renderDeliveryMode("Home delivery"),
-        value: "Home delivery",
-      },
-      scheduleDateTime: {
-        jsx: renderScheduleTime("April 17", "03:10 AM"),
-        value: "April 17-03:10 AM",
-      },
-      paymentMethod: {
-        jsx: renderPaymentMethod("Credit Card", "6"),
-        value: "Credit Card",
-      },
-      createdDate: "2025-02-24",
-    },
-    {
-      id: "7",
-      orderId: { jsx: renderOrderId("#20351", "7"), value: "#20351" },
-      amount: "₹700.00",
-      status: { jsx: renderStatus(""), value: "New" },
-      store: "Brass Tacks",
-      deliveryAddress: "2972 Westheimer Rd. Santa Ana, Illinois 85486",
-      deliveryMode: {
-        jsx: renderDeliveryMode("Home delivery"),
-        value: "Home delivery",
-      },
-      scheduleDateTime: {
-        jsx: renderScheduleTime("August 22", "05:22 AM"),
-        value: "August 22-05:22 AM",
-      },
-      paymentMethod: { jsx: renderPaymentMethod("Cash", "7"), value: "Cash" },
-      createdDate: "2025-02-25",
-    },
-    {
-      id: "8",
-      orderId: { jsx: renderOrderId("#20352", "8"), value: "#20352" },
-      amount: "₹800.00",
-      status: { jsx: renderStatus("Completed"), value: "Completed" },
-      store: "Bean Around the World Coffees",
-      deliveryAddress: "2715 Ash Dr. San Jose, South Dakota 83475",
-      deliveryMode: {
-        jsx: renderDeliveryMode("Home delivery"),
-        value: "Home delivery",
-      },
-      scheduleDateTime: {
-        jsx: renderScheduleTime("August 22", "05:22 AM"),
-        value: "August 22-05:22 AM",
-      },
-      paymentMethod: { jsx: renderPaymentMethod("UPI", "8"), value: "UPI" },
-      createdDate: "2025-02-26",
-    },
-    {
-      id: "9",
-      orderId: { jsx: renderOrderId("#20353", "9"), value: "#20353" },
-      amount: "₹900.00",
-      status: { jsx: renderStatus("Cancelled"), value: "Cancelled" },
-      store: "Chewy Balls",
-      deliveryAddress: "1901 Thornridge Cir. Shiloh, Hawaii 81063",
-      deliveryMode: {
-        jsx: renderDeliveryMode("Home delivery"),
-        value: "Home delivery",
-      },
-      scheduleDateTime: {
-        jsx: renderScheduleTime("August 22", "05:22 AM"),
-        value: "August 22-05:22 AM",
-      },
-      paymentMethod: {
-        jsx: renderPaymentMethod("Credit Card", "9"),
-        value: "Credit Card",
-      },
-      createdDate: "2025-02-27",
-    },
-    {
-      id: "10",
-      orderId: { jsx: renderOrderId("#20354", "10"), value: "#20354" },
-      amount: "₹1000.00",
-      status: {
-        jsx: renderStatus("Out for delivery"),
-        value: "Out for delivery",
-      },
-      store: "Proxi",
-      deliveryAddress: "2118 Thornridge Cir. Syracuse, Connecticut 35624",
-      deliveryMode: {
-        jsx: renderDeliveryMode("Home delivery"),
-        value: "Home delivery",
-      },
-      scheduleDateTime: {
-        jsx: renderScheduleTime("August 22", "05:22 AM"),
-        value: "August 22-05:22 AM",
-      },
-      paymentMethod: { jsx: renderPaymentMethod("Cash", "10"), value: "Cash" },
-      createdDate: "2025-02-28",
-    },
-  ]);
-
+  const [orders, setOrders] = useState<Order[]>([]);
   // Modal field definitions
   const modalFields: FieldDefinition[] = [
     {
@@ -554,7 +362,7 @@ const Orders = () => {
       type: "jsx",
     },
     {
-      field: "scheduleDateTime",
+      field: "scheduledDateTime",
       headerName: "Schedule Time",
       type: "jsx",
     },
@@ -633,7 +441,42 @@ const Orders = () => {
     };
   }, [popoverOpen, popoverAnchorEl]);
 
+  const fetchOrdersApi = async () => {
+    // fetch orders api
+    setIsLoading(true)
+    const ordersResp = await fetchOrders();
+    const ordersTemp: Order[] = ordersResp.map((item) => ({
+      id: item.id,
+      orderId: {
+        jsx: renderOrderId(item.orderId, item.id),
+        value: item.orderId,
+      },
+      amount: item.amount,
+      status: {
+        jsx: renderStatus(item.status),
+        value: item.status == "" ? "New" : item.status,
+      },
+      store: item.store,
+      deliveryAddress: item.deliveryAddress,
+      deliveryMode: {
+        jsx: renderDeliveryMode(item.deliveryMode),
+        value: item.deliveryMode,
+      },
+      scheduledDateTime: {
+        jsx: renderScheduleTime(item.scheduledDate, item.scheduledTime),
+        value: `${item.scheduledDate}-${item.scheduledTime}`,
+      },
+      paymentMethod: {
+        jsx: renderPaymentMethod(item.paymentMethod, item.id),
+        value: item.paymentMethod,
+      },
+      createdDate: item.createdDate,
+    }));
+    setOrders(ordersTemp);
+    setIsLoading(false);
+  };
   useEffect(() => {
+    fetchOrdersApi();
     const handleClickOutside = (event: MouseEvent) => {
       if (
         actionsDropdownRef.current &&
@@ -701,7 +544,7 @@ const Orders = () => {
           jsx: renderDeliveryMode(data.deliveryMode),
           value: data.deliveryMode,
         },
-        scheduleDateTime: {
+        scheduledDateTime: {
           jsx: renderScheduleTime(data.scheduleDate, data.scheduleTime),
           value: `${data.scheduleDate}-${data.scheduleTime}`,
         },
@@ -725,7 +568,9 @@ const Orders = () => {
   };
 
   return (
-    <div className="p-0 max-w-full rounded-lg p-1 md:p-6 lg:p-0 xl:p-0 sm:max-h-full md:max-h-full lg:max-h-full xl:max-h-full max-h-[80vh] overflow-y-auto bg-background-grey">
+    <>
+    {isLoading && <div>Loading orders.....</div>}
+    {!isLoading && <div className="p-0 max-w-full rounded-lg p-1 md:p-6 lg:p-0 xl:p-0 sm:max-h-full md:max-h-full lg:max-h-full xl:max-h-full max-h-[80vh] overflow-y-auto bg-background-grey">
       {/* Header with search and buttons */}
       <div className="flex justify-between items-center mb-6 px-8 pt-8 ">
         <h1 className="text-[16px] md:text-[20px] lg:text-[20px] sm:text-[20px] xl:text-[20px] font-inter font-[600] text-cardValue">
@@ -926,7 +771,9 @@ const Orders = () => {
             confirmText={modalMode === "add" ? "Create" : "Save"}
           />
         ))}
-    </div>
+    </div>}
+    </>
+    
   );
 };
 

@@ -562,17 +562,11 @@ const Orders = () => {
       field: "createdDate",
       headerName: "Created Date",
       type: "date",
-      // renderCell: (value, row) => (
-      //   <div className="text-[14px] font-inter font-[500] text-cardValue">
-      //     {value}
-      //   </div>
-      // ),
     },
     {
       field: "paymentMethod",
       headerName: "Payment Method",
       type: "jsx",
-      // renderCell: (value, row) => renderPaymentMethod(value, row),
     },
   ];
 
@@ -641,7 +635,6 @@ const Orders = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-
       if (
         actionsDropdownRef.current &&
         !actionsDropdownRef.current.contains(event.target as Node)
@@ -680,21 +673,23 @@ const Orders = () => {
             : order
         );
         setOrders(updatedOrders);
-        // applyAllFilters(); // Reapply filters
       }
     } else if (modalMode === "add") {
       const newOrderID = `#${Math.floor(10000 + Math.random() * 90000)}`;
       const newId = Math.random().toString(36).substr(2, 9);
       const newStatus = data.status as
-      | "Pending"
-      | "Completed"
-      | "Dispatched"
-      | "Cancelled"
-      | "Out for delivery";
-      const newPaymentMethod = data.paymentMethod as "Cash" | "UPI" | "Credit Card";
+        | "Pending"
+        | "Completed"
+        | "Dispatched"
+        | "Cancelled"
+        | "Out for delivery";
+      const newPaymentMethod = data.paymentMethod as
+        | "Cash"
+        | "UPI"
+        | "Credit Card";
       const newOrder: Order = {
         id: newId,
-        orderId: {jsx:renderOrderId(newOrderID, newId), value:newOrderID},
+        orderId: { jsx: renderOrderId(newOrderID, newId), value: newOrderID },
         amount: `₹${parseFloat(data.amount).toFixed(2)}`,
         status: {
           jsx: renderStatus(newStatus),
@@ -710,11 +705,13 @@ const Orders = () => {
           jsx: renderScheduleTime(data.scheduleDate, data.scheduleTime),
           value: `${data.scheduleDate}-${data.scheduleTime}`,
         },
-        paymentMethod: { jsx: renderPaymentMethod(newPaymentMethod, newId), value: newPaymentMethod },
+        paymentMethod: {
+          jsx: renderPaymentMethod(newPaymentMethod, newId),
+          value: newPaymentMethod,
+        },
         createdDate: data.createdDate || new Date().toISOString().split("T")[0],
       };
       setOrders((prev) => [...prev, newOrder]);
-      // applyAllFilters(); // Reapply filters after adding new order
     } else if (modalMode === "edit") {
       // Handle edit functionality
       if (selectedOrder) {
@@ -722,7 +719,6 @@ const Orders = () => {
           order.id === selectedOrder.id ? { ...order, ...data } : order
         );
         setOrders(updatedOrders);
-        // applyAllFilters();
       }
     }
     setIsModalOpen(false);

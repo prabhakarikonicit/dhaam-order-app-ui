@@ -1,11 +1,15 @@
 import * as path from "node:path";
+import { fileURLToPath } from "node:url";
+import { dirname } from "node:path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 import { defineConfig } from "@rspack/cli";
 import { rspack } from "@rspack/core";
-import * as RefreshPlugin from "@rspack/plugin-react-refresh";
+import RefreshPlugin from "@rspack/plugin-react-refresh";
 import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
-
-
-import { mfConfig } from "./module-federation.config";
+import { mfConfig } from "./module-federation.config.ts";
 
 const isDev = process.env.NODE_ENV === "development";
 

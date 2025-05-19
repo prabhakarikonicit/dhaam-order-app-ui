@@ -9,7 +9,7 @@ import { defineConfig } from "@rspack/cli";
 import { rspack } from "@rspack/core";
 import RefreshPlugin from "@rspack/plugin-react-refresh";
 import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
-import { mfConfig } from "./module-federation.config.ts";
+import { mfConfig } from "./module-federation.config.js";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -34,7 +34,7 @@ export default defineConfig({
     // You need to set a unique value that is not equal to other applications
     uniqueName: "dhaam_order_app_ui",
     // publicPath must be configured if using manifest
-    publicPath: "http://localhost:3002/",
+    publicPath: "auto",
   },
 
   experiments: {
